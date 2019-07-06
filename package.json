@@ -1,7 +1,7 @@
 {
   "name": "@yurayarosh/fullpage-js",
   "description": "JS plugin for making fullpage pagination",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "repository": {
     "type": "git",
