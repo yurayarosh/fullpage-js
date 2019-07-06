@@ -1,4 +1,4 @@
-# fullpage-js
+# fullpage-pagination
 
 ### Example
 
@@ -7,7 +7,7 @@
 ### Install
 
 ```html
-npm i @yurayarosh/fullpage-js' -D
+npm i fullpage-pagination' -D
 ```
 
 ```html
