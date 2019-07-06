@@ -32,7 +32,7 @@ npm i @yurayarosh/fullpage-js' -D
 ```
 
 ```js
-import Fullpage from 'fullpage-js';
+import Fullpage from 'fullpage-pagination';
 
 const page = document.querySelector('.js-fullpage');
 const nav = document.querySelector('.js-fullpage-nav');
