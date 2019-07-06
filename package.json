@@ -1,0 +1,26 @@
+{
+  "name": "fullpage-js",
+  "description": "JS plugin for making fullpage pagination",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yurayarosh/fullpage-js"
+  },
+  "keywords": [
+    "fullpage",
+    "fullpage js"
+  ],
+  "authors": "yurayarosh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yurayarosh/fullpage-js/issues"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-latest": "^6.24.1",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-uglify": "^6.0.2"
+  }
+}
