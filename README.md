@@ -1,5 +1,9 @@
 # fullpage-js
 
+### Example
+
+  * [Codepen](https://codepen.io/yurayarosh/pen/jjvXYZ?editors=0010)
+
 ### Install
 
 ```html
@@ -28,7 +32,7 @@ npm i @yurayarosh/fullpage-js' -D
 ```
 
 ```js
-import Fullpage from '@yurayarosh/fullpage-js'';
+import Fullpage from '@yurayarosh/fullpage-js';
 
 const page = document.querySelector('.js-fullpage');
 const nav = document.querySelector('.js-fullpage-nav');
