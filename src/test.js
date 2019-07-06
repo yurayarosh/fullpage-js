@@ -20,15 +20,5 @@ const fullpage = new Fullpage(page, {
   prevButton: prev,
   nextButton: next
 });
-fullpage.onExit = (section, resolve) => {
-  console.log('this is some EXIT animation hapening');
-  setTimeout(() => {
-    console.log('EXIT animaton finished with this section', section);
-    resolve();
-  }, 0);
-};
-fullpage.onEnter = (section) => {
-  console.log('hello from ENTER animation. this is current section', section);
-};
 fullpage.init();
 

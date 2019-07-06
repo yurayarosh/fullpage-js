@@ -109,6 +109,8 @@ var Animator = function () {
       return new Promise(function (resolve) {
         if (_this2.onExit) {
           _this2.onExit(_this2.current, resolve);
+        } else {
+          resolve();
         }      });
     }
   }, {
@@ -422,14 +424,4 @@ var fullpage = new Fullpage(page, {
   prevButton: prev,
   nextButton: next
 });
-fullpage.onExit = function (section, resolve) {
-  console.log('this is some EXIT animation hapening');
-  setTimeout(function () {
-    console.log('EXIT animaton finished with this section', section);
-    resolve();
-  }, 0);
-};
-fullpage.onEnter = function (section) {
-  console.log('hello from ENTER animation. this is current section', section);
-};
 fullpage.init();

@@ -50,6 +50,8 @@ export default class Animator {
     return new Promise(resolve => {
       if (this.onExit) {
         this.onExit(this.current, resolve);
+      } else {
+        resolve();
       };
     });
   };
