@@ -3,7 +3,7 @@
 ### Install
 
 ```html
-npm i fullpage-js -D
+npm i @yurayarosh/fullpage-js' -D
 ```
 
 ```html
@@ -28,7 +28,7 @@ npm i fullpage-js -D
 ```
 
 ```js
-import Fullpage from 'fullpage-js';
+import Fullpage from '@yurayarosh/fullpage-js'';
 
 const page = document.querySelector('.js-fullpage');
 const nav = document.querySelector('.js-fullpage-nav');
