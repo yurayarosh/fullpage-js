@@ -1,0 +1,17 @@
+.fullpage {
+  overflow: hidden;
+  height: 100vh;
+}
+.fullpage__section {  
+  height: 100vh;
+}
+.fullpage__section.is-absolute {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: none;
+}
+.fullpage__section.is-absolute.is-active {
+  display: block;
+}
