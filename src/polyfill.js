@@ -31,7 +31,6 @@ if (!Object.assign) {
 };
 
 if (!Element.prototype.closest) {
-
   Element.prototype.closest = function(selector) {
     var elem = this;
 

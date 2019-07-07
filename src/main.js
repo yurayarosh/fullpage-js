@@ -1,10 +1,17 @@
-// import * as help from './helpFunctions';
+// import './polyfill';
+import { checkPropertiesSupport, createTouchEvents } from './helpers';
 import Animator from './Animator';
-import './touchevents';
 
-export default class Fullpage {
+checkPropertiesSupport();
+
+export function addFpTouchEvents() {
+  createTouchEvents(document);
+};
+
+export class Fullpage {
   constructor(container, options) {
     this.container = container;
+    this.sections = [].slice.call(this.container.children);
     this.defaultParams = {
       delay: 1400,
       transition: 500,
@@ -14,7 +21,9 @@ export default class Fullpage {
       prevButton: false,
       nextButton: false,
       fadeIn: false,
-      fadeInDuration: 500
+      fadeInDuration: 500,
+      touchevents: false,
+      customTransition: false
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = {
@@ -27,28 +36,22 @@ export default class Fullpage {
       prevButton: options.prevButton,
       nextButton: options.nextButton,
       fadeIn: options.fadeIn,
-      fadeInDuration: options.fadeInDuration
+      fadeInDuration: options.fadeInDuration,
+      touchevents: options.touchevents,
+      customTransition: options.customTransition,
     };
 
     this.allowPagination = true;
     this.current = 0;
   };
 
-  init() {
+  init() {    
     this._addElementsAttributes();
     this._crateNavigation();
 
     this.paginateBinded = this.paginate.bind(this);
 
     this._paginate();
-  };
-
-  get wrap() {
-    return this.container.parentNode;
-  };
-
-  get sections() {
-    return [].slice.call(this.container.children);
   };
 
   paginateToNext(condition) {
@@ -108,13 +111,15 @@ export default class Fullpage {
           && nextBtn === null) return;      
     };
 
-    if (e.type === 'swu') {
-      this.paginateToNext(true);
-    };
+    if (this.options.touchevents) {
+      if (e.type === 'swu') {
+        this.paginateToNext(true);
+      };
 
-    if (e.type === 'swd') {
-      this.paginateToNext(false);
-    };
+      if (e.type === 'swd') {
+        this.paginateToNext(false);
+      };
+    };    
 
     if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
 
@@ -136,7 +141,8 @@ export default class Fullpage {
       onExit: this.onExit,
       onEnter: this.onEnter,
       fadeIn: this.options.fadeIn,
-      fadeInDuration: this.options.fadeInDuration
+      fadeInDuration: this.options.fadeInDuration,
+      customTransition: this.options.customTransition
     });
     this.animator.animate();
 
@@ -145,7 +151,7 @@ export default class Fullpage {
     setTimeout(() => {
       this.allowPagination = true;
     }, this.options.delay);
-  };
+  };  
 
   _addElementsAttributes() {
     // add sections fade class
@@ -175,7 +181,7 @@ export default class Fullpage {
   };
 
   _paginate() {
-    const events = ['wheel', 'click', 'swu', 'swd'];
+    const events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
 
     events.forEach(event => {
       document.addEventListener(event, this.paginateBinded);

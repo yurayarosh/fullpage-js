@@ -1,11 +1,11 @@
 {
   "name": "fullpage-pagination",
   "description": "JS plugin for making fullpage pagination",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yurayarosh/fullpage-js"
+    "url": "https://github.com/yurayarosh/fullpage-pagination"
   },
   "keywords": [
     "fullpage",
@@ -14,7 +14,7 @@
   "authors": "yurayarosh",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yurayarosh/fullpage-js/issues"
+    "url": "https://github.com/yurayarosh/fullpage-pagination/issues"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

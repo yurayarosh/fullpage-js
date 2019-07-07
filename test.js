@@ -1,5 +1,43 @@
 'use strict';
 
+function checkPropertiesSupport() {
+  if (!Object.assign) {
+    console.warn('This browser does not support `Object.assign`. You should use polyfill.');
+  }  if (!Element.prototype.closest) {
+    console.warn('This browser does not support `closest` method. You should use polyfill.');
+  }  if (typeof Promise === "undefined" || Promise.toString().indexOf("[native code]") === -1) {
+    console.warn('This browser does not support `Promise`. You should use polyfill.');
+  }}
+function createTouchEvents(d) {
+  var ce = function ce(e, n) {
+    var a = document.createEvent('CustomEvent');a.initCustomEvent(n, true, true, e.target);e.target.dispatchEvent(a);a = null;return false;
+  };
+  var nm = true;var sp = { x: 0, y: 0 };var ep = { x: 0, y: 0 };
+  var touch = {
+    touchstart: function touchstart(e) {
+      sp = { x: e.touches[0].pageX, y: e.touches[0].pageY };
+    },
+    touchmove: function touchmove(e) {
+      nm = false;ep = { x: e.touches[0].pageX, y: e.touches[0].pageY };
+    },
+    touchend: function touchend(e) {
+      if (nm) {
+        ce(e, 'fc');
+      } else {
+        var x = ep.x - sp.x;var xr = Math.abs(x);var y = ep.y - sp.y;var yr = Math.abs(y);if (Math.max(xr, yr) > 20) {
+          ce(e, xr > yr ? x < 0 ? 'swl' : 'swr' : y < 0 ? 'swu' : 'swd');
+        }
+      }nm = true;
+    },
+    touchcancel: function touchcancel(e) {
+      nm = false;
+    }
+  };
+  for (var i in touch) {
+    d.addEventListener(i, touch[i], false);
+  }
+}
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -50,7 +88,8 @@ var Animator = function () {
         onExit = _ref.onExit,
         onEnter = _ref.onEnter,
         fadeIn = _ref.fadeIn,
-        fadeInDuration = _ref.fadeInDuration;
+        fadeInDuration = _ref.fadeInDuration,
+        customTransition = _ref.customTransition;
     classCallCheck(this, Animator);
 
     this.direction = direction;
@@ -67,6 +106,7 @@ var Animator = function () {
     this.onEnter = onEnter;
     this.fadeIn = fadeIn;
     this.fadeInDuration = fadeInDuration;
+    this.customTransition = customTransition;
   }
 
   createClass(Animator, [{
@@ -102,13 +142,38 @@ var Animator = function () {
       }, 66);
     }
   }, {
-    key: '_onExit',
-    value: function _onExit() {
+    key: 'scrollToSection',
+    value: function scrollToSection() {
       var _this2 = this;
 
+      var wrapTop = this.getSectionTop(this.container);
+      var nextTop = this.getSectionTop(this.next) - wrapTop;
+      var currentTop = this.getSectionTop(this.current) - wrapTop;
+
+      this.translate = nextTop;
+
+      this.container.style.transform = 'translate(0px, -' + this.translate + 'px)';
+      this.container.style.transition = 'transform ' + this.transition + 'ms ' + this.easing;
+
+      setTimeout(function () {
+        _this2.container.style.transition = '';
+        _this2.toggleActiveClasses();
+      }, this.transition);
+    }
+  }, {
+    key: 'toggleActiveClasses',
+    value: function toggleActiveClasses() {
+      this.current.classList.remove(Animator.classNames.IS_ACTIVE);
+      this.next.classList.add(Animator.classNames.IS_ACTIVE);
+    }
+  }, {
+    key: '_onExit',
+    value: function _onExit() {
+      var _this3 = this;
+
       return new Promise(function (resolve) {
-        if (_this2.onExit) {
-          _this2.onExit(_this2.current, resolve);
+        if (_this3.onExit) {
+          _this3.onExit(_this3.current, resolve);
         } else {
           resolve();
         }      });
@@ -122,26 +187,12 @@ var Animator = function () {
   }, {
     key: '_changeSection',
     value: function _changeSection() {
-      var _this3 = this;
-
       if (this.fadeIn) {
-        // this.setActiveClasses();
         this.fadeToggle();
+      } else if (this.customTransition) {
+        this.toggleActiveClasses();
       } else {
-        var wrapTop = this.getSectionTop(this.container);
-        var nextTop = this.getSectionTop(this.next) - wrapTop;
-        var currentTop = this.getSectionTop(this.current) - wrapTop;
-
-        this.translate = nextTop;
-
-        this.container.style.transform = 'translate(0px, -' + this.translate + 'px)';
-        this.container.style.transition = 'transform ' + this.transition + 'ms ' + this.easing;
-
-        setTimeout(function () {
-          _this3.container.style.transition = '';
-          _this3.current.classList.remove(Animator.classNames.IS_ACTIVE);
-          _this3.next.classList.add(Animator.classNames.IS_ACTIVE);
-        }, this.transition);
+        this.scrollToSection();
       }    }
   }]);
   return Animator;
@@ -151,38 +202,13 @@ Animator.classNames = {
   IS_ACTIVE: 'is-active'
 };
 
-(function (d) {
-  var ce = function ce(e, n) {
-    var a = document.createEvent('CustomEvent');a.initCustomEvent(n, true, true, e.target);e.target.dispatchEvent(a);a = null;return false;
-  };
-  var nm = true;var sp = { x: 0, y: 0 };var ep = { x: 0, y: 0 };
-  var touch = {
-    touchstart: function touchstart(e) {
-      sp = { x: e.touches[0].pageX, y: e.touches[0].pageY };
-    },
-    touchmove: function touchmove(e) {
-      nm = false;ep = { x: e.touches[0].pageX, y: e.touches[0].pageY };
-    },
-    touchend: function touchend(e) {
-      if (nm) {
-        ce(e, 'fc');
-      } else {
-        var x = ep.x - sp.x;var xr = Math.abs(x);var y = ep.y - sp.y;var yr = Math.abs(y);if (Math.max(xr, yr) > 20) {
-          ce(e, xr > yr ? x < 0 ? 'swl' : 'swr' : y < 0 ? 'swu' : 'swd');
-        }
-      }nm = true;
-    },
-    touchcancel: function touchcancel(e) {
-      nm = false;
-    }
-  };
-  for (var i in touch) {
-    d.addEventListener(i, touch[i], false);
-  }
-})(document);
+// import './polyfill';
 
-// import * as help from './helpFunctions';
+checkPropertiesSupport();
 
+function addFpTouchEvents() {
+  createTouchEvents(document);
+}
 var Fullpage = function () {
   function Fullpage(container, options) {
     var _options;
@@ -190,6 +216,7 @@ var Fullpage = function () {
     classCallCheck(this, Fullpage);
 
     this.container = container;
+    this.sections = [].slice.call(this.container.children);
     this.defaultParams = {
       delay: 1400,
       transition: 500,
@@ -199,7 +226,9 @@ var Fullpage = function () {
       prevButton: false,
       nextButton: false,
       fadeIn: false,
-      fadeInDuration: 500
+      fadeInDuration: 500,
+      touchevents: false,
+      customTransition: false
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = (_options = {
@@ -209,7 +238,7 @@ var Fullpage = function () {
       navigation: options.navigation,
       renderNavButton: options.renderNavButton,
       prevButton: options.prevButton
-    }, defineProperty(_options, 'prevButton', options.prevButton), defineProperty(_options, 'nextButton', options.nextButton), defineProperty(_options, 'fadeIn', options.fadeIn), defineProperty(_options, 'fadeInDuration', options.fadeInDuration), _options);
+    }, defineProperty(_options, 'prevButton', options.prevButton), defineProperty(_options, 'nextButton', options.nextButton), defineProperty(_options, 'fadeIn', options.fadeIn), defineProperty(_options, 'fadeInDuration', options.fadeInDuration), defineProperty(_options, 'touchevents', options.touchevents), defineProperty(_options, 'customTransition', options.customTransition), _options);
 
     this.allowPagination = true;
     this.current = 0;
@@ -281,12 +310,13 @@ var Fullpage = function () {
         }
         if (navBtn === null && anchorBtn === null && prevBtn === null && nextBtn === null) return;
       }
-      if (e.type === 'swu') {
-        this.paginateToNext(true);
-      }
-      if (e.type === 'swd') {
-        this.paginateToNext(false);
-      }
+      if (this.options.touchevents) {
+        if (e.type === 'swu') {
+          this.paginateToNext(true);
+        }
+        if (e.type === 'swd') {
+          this.paginateToNext(false);
+        }      }
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
 
       this.allowPagination = false;
@@ -307,7 +337,8 @@ var Fullpage = function () {
         onExit: this.onExit,
         onEnter: this.onEnter,
         fadeIn: this.options.fadeIn,
-        fadeInDuration: this.options.fadeInDuration
+        fadeInDuration: this.options.fadeInDuration,
+        customTransition: this.options.customTransition
       });
       this.animator.animate();
 
@@ -347,7 +378,7 @@ var Fullpage = function () {
     value: function _paginate() {
       var _this2 = this;
 
-      var events = ['wheel', 'click', 'swu', 'swd'];
+      var events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
 
       events.forEach(function (event) {
         document.addEventListener(event, _this2.paginateBinded);
@@ -380,20 +411,9 @@ var Fullpage = function () {
         list.appendChild(item);
       }      this.navigation = [].slice.call(nav.querySelectorAll('.' + Fullpage.constants.navButton));
     }
-  }, {
-    key: 'wrap',
-    get: function get() {
-      return this.container.parentNode;
-    }
-  }, {
-    key: 'sections',
-    get: function get() {
-      return [].slice.call(this.container.children);
-    }
   }]);
   return Fullpage;
 }();
-
 Fullpage.constants = {
   IS_ACTIVE: 'is-active',
   IS_ABSOLUTE: 'is-absolute',
@@ -407,6 +427,7 @@ Fullpage.constants = {
 };
 
 // commands
+addFpTouchEvents();
 
 var page = document.querySelector('.js-fullpage');
 var nav = document.querySelector('.js-fullpage-nav');
@@ -422,6 +443,18 @@ var fullpage = new Fullpage(page, {
     return '0' + (i + 1);
   },
   prevButton: prev,
-  nextButton: next
+  nextButton: next,
+  touchevents: true,
+  customTransition: false
 });
+fullpage.onExit = function (section, resolve) {
+  console.log('EXIT animation is hapening');
+  setTimeout(function () {
+    console.log('EXIT animaton has finished in this section', section);
+    resolve();
+  }, 1000);
+};
+fullpage.onEnter = function (section) {
+  console.log('ENTER animation has started in this section', section);
+};
 fullpage.init();

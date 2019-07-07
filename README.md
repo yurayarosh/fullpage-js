@@ -7,7 +7,7 @@
 ### Install
 
 ```html
-npm i fullpage-pagination' -D
+npm i fullpage-pagination -D
 ```
 
 ```html
@@ -32,7 +32,8 @@ npm i fullpage-pagination' -D
 ```
 
 ```js
-import Fullpage from 'fullpage-pagination';
+import { Fullpage, addFpTouchEvents } from 'fullpage-pagination';
+addFpTouchEvents();
 
 const page = document.querySelector('.js-fullpage');
 const nav = document.querySelector('.js-fullpage-nav');
@@ -41,6 +42,7 @@ const next = document.querySelector('.js-next');
 
 const fullpage = new Fullpage(page, {
   easing: 'ease-out',
+  touchevents: true,
   navigation: nav,
   fadeIn: false,
   fadeInDuration: 1000,
@@ -51,14 +53,14 @@ const fullpage = new Fullpage(page, {
   nextButton: next
 });
 fullpage.onExit = (section, resolve) => {
-  console.log('this is some EXIT animation hapening');
+  console.log('EXIT animation is hapening');
   setTimeout(() => {
-    console.log('EXIT animaton finished with this section', section);
+    console.log('EXIT animaton has finished in this section', section);
     resolve();
   }, 0);
 };
 fullpage.onEnter = (section) => {
-  console.log('hello from ENTER animation. this is current section', section);
+  console.log('ENTER animation has started in this section', section);
 };
 fullpage.init();
 ```
@@ -76,7 +78,9 @@ Standart options
   prevButton: false,
   nextButton: false,
   fadeIn: false,
-  fadeInDuration: 500
+  fadeInDuration: 500,
+  customTransition: false,
+  touchevents: false
 }
 ```
 

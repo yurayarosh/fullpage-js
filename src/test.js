@@ -2,7 +2,8 @@
 // rollup -c -w watch files
 // rollup -c - bundle files
 
-import Fullpage from './main';
+import { Fullpage, addFpTouchEvents } from './main';
+addFpTouchEvents();
 
 const page = document.querySelector('.js-fullpage');
 const nav = document.querySelector('.js-fullpage-nav');
@@ -18,7 +19,19 @@ const fullpage = new Fullpage(page, {
     return '0' + (i + 1);
   },
   prevButton: prev,
-  nextButton: next
+  nextButton: next,
+  touchevents: true,
+  customTransition: false
 });
+fullpage.onExit = (section, resolve) => {
+  console.log('EXIT animation is hapening');
+  setTimeout(() => {
+    console.log('EXIT animaton has finished in this section', section);
+    resolve();
+  }, 1000);
+};
+fullpage.onEnter = (section) => {
+  console.log('ENTER animation has started in this section', section);
+};
 fullpage.init();
 

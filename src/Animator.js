@@ -1,5 +1,5 @@
 export default class Animator {
-  constructor({ direction, sections, from, to, transition, easing, onExit, onEnter, fadeIn, fadeInDuration }) {
+  constructor({ direction, sections, from, to, transition, easing, onExit, onEnter, fadeIn, fadeInDuration, customTransition }) {
     this.direction = direction;
     this.sections = sections;
     this.from = from;
@@ -14,13 +14,13 @@ export default class Animator {
     this.onEnter = onEnter;
     this.fadeIn = fadeIn;
     this.fadeInDuration = fadeInDuration;
+    this.customTransition = customTransition;
   };
 
   animate() {
     this._onExit()
       .then(this._changeSection.bind(this))
-      .then(this._onEnter.bind(this));
-    
+      .then(this._onEnter.bind(this));    
   };
 
   getSectionTop(section) {
@@ -46,6 +46,27 @@ export default class Animator {
     }, 66);      
   };
 
+  scrollToSection() {
+    const wrapTop = this.getSectionTop(this.container);
+    const nextTop = this.getSectionTop(this.next) - wrapTop;
+    const currentTop = this.getSectionTop(this.current) - wrapTop;
+
+    this.translate = nextTop;
+
+    this.container.style.transform = `translate(0px, -${this.translate}px)`;
+    this.container.style.transition = `transform ${this.transition}ms ${this.easing}`;
+
+    setTimeout(() => {
+      this.container.style.transition = '';
+      this.toggleActiveClasses();
+    }, this.transition);
+  };
+
+  toggleActiveClasses() {
+    this.current.classList.remove(Animator.classNames.IS_ACTIVE);
+    this.next.classList.add(Animator.classNames.IS_ACTIVE);
+  };
+
   _onExit() {
     return new Promise(resolve => {
       if (this.onExit) {
@@ -64,27 +85,15 @@ export default class Animator {
 
   _changeSection() {
     if (this.fadeIn) {
-      // this.setActiveClasses();
       this.fadeToggle();
+    } else if (this.customTransition) {
+      this.toggleActiveClasses();
     } else {
-      const wrapTop = this.getSectionTop(this.container);
-      const nextTop = this.getSectionTop(this.next) - wrapTop;
-      const currentTop = this.getSectionTop(this.current) - wrapTop;
-
-      this.translate = nextTop;
-
-      this.container.style.transform = `translate(0px, -${this.translate}px)`;
-      this.container.style.transition = `transform ${this.transition}ms ${this.easing}`;
-
-      setTimeout(() => {
-        this.container.style.transition = '';
-        this.current.classList.remove(Animator.classNames.IS_ACTIVE);
-        this.next.classList.add(Animator.classNames.IS_ACTIVE);
-      }, this.transition);
+      this.scrollToSection();
     };        
   };
 };
 
 Animator.classNames = {
   IS_ACTIVE: 'is-active'
-}
+};
