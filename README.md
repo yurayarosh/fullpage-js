@@ -2,7 +2,7 @@
 
 ### Example
 
-  * [Codepen](https://codepen.io/yurayarosh/pen/jjvXYZ?editors=0010)
+  * [Codesandbox](https://codesandbox.io/s/fullpage-pagination-example-srixb)
 
 ### Install
 
