@@ -13,7 +13,7 @@ const next = document.querySelector('.js-next');
 const fullpage = new Fullpage(page, {
   easing: 'ease-out',
   navigation: nav,
-  fadeIn: false,
+  fadeIn: true,
   fadeInDuration: 1000,
   renderNavButton: (i) => {
     return '0' + (i + 1);
