@@ -80,7 +80,8 @@ Standart options
   fadeIn: false,
   fadeInDuration: 500,
   customTransition: false,
-  touchevents: false
+  touchevents: false,
+  loop: false
 }
 ```
 
