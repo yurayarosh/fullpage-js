@@ -62,21 +62,6 @@ var createClass = function () {
   };
 }();
 
-var defineProperty = function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-};
-
 var Animator = function () {
   function Animator(_ref) {
     var direction = _ref.direction,
@@ -211,8 +196,6 @@ function addFpTouchEvents() {
 }
 var Fullpage = function () {
   function Fullpage(container, options) {
-    var _options;
-
     classCallCheck(this, Fullpage);
 
     this.container = container;
@@ -232,14 +215,24 @@ var Fullpage = function () {
       loop: false
     };
     options = Object.assign({}, this.defaultParams, options);
-    this.options = (_options = {
+    this.options = {
       delay: options.delay,
       transition: options.transition,
       easing: options.easing,
       navigation: options.navigation,
       renderNavButton: options.renderNavButton,
+<<<<<<< HEAD
       prevButton: options.prevButton
     }, defineProperty(_options, 'prevButton', options.prevButton), defineProperty(_options, 'nextButton', options.nextButton), defineProperty(_options, 'fadeIn', options.fadeIn), defineProperty(_options, 'fadeInDuration', options.fadeInDuration), defineProperty(_options, 'touchevents', options.touchevents), defineProperty(_options, 'customTransition', options.customTransition), defineProperty(_options, 'loop', options.loop), _options);
+=======
+      prevButton: options.prevButton,
+      nextButton: options.nextButton,
+      fadeIn: options.fadeIn,
+      fadeInDuration: options.fadeInDuration,
+      touchevents: options.touchevents,
+      customTransition: options.customTransition
+    };
+>>>>>>> b802308a8e8ef2bc0bf3966516be8e9f32508d51
 
     this.allowPagination = true;
     this.current = 0;
@@ -318,6 +311,7 @@ var Fullpage = function () {
         if (e.type === 'swd') {
           this.paginateToNext(false);
         }      }
+<<<<<<< HEAD
       if (this.options.loop) {
         if (this.next > this.sections.length - 1) {
           this.next = 0;
@@ -332,6 +326,19 @@ var Fullpage = function () {
       } else {
         if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
       }
+=======
+      if (this.next === this.sections.length - 1) {
+        this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
+      } else {
+        this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      }      if (this.next === 0) {
+        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+      } else {
+        this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      }
+      if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
+
+>>>>>>> b802308a8e8ef2bc0bf3966516be8e9f32508d51
       this.allowPagination = false;
 
       this.navigation.forEach(function (btn) {
@@ -385,6 +392,10 @@ var Fullpage = function () {
         this.options.prevButton.classList.add(Fullpage.constants.prev);
       }      if (this.options.nextButton) {
         this.options.nextButton.classList.add(Fullpage.constants.next);
+      }
+      // add prevButton disabled class
+      if (this.current === 0) {
+        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
       }    }
   }, {
     key: '_paginate',
@@ -430,6 +441,7 @@ var Fullpage = function () {
 Fullpage.constants = {
   IS_ACTIVE: 'is-active',
   IS_ABSOLUTE: 'is-absolute',
+  IS_DISABLED: 'is-disabled',
   navList: 'fullpage-nav',
   navItem: 'fullpage-nav__item',
   navButton: 'fullpage-nav__button',

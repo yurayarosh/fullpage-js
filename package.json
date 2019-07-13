@@ -1,7 +1,7 @@
 {
   "name": "fullpage-pagination",
   "description": "JS plugin for making fullpage pagination",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "index.js",
   "repository": {
     "type": "git",
