@@ -133,12 +133,10 @@ export class Fullpage {
         this.loopTo = false;
       };
 
-<<<<<<< HEAD
       if (this.next === this.current) return;
     } else {
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
     };    
-=======
     if (this.next === this.sections.length - 1) {
       this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
     } else {
@@ -151,7 +149,6 @@ export class Fullpage {
     };
 
     if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
->>>>>>> b802308a8e8ef2bc0bf3966516be8e9f32508d51
 
     this.allowPagination = false;
 

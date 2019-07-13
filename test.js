@@ -221,18 +221,14 @@ var Fullpage = function () {
       easing: options.easing,
       navigation: options.navigation,
       renderNavButton: options.renderNavButton,
-<<<<<<< HEAD
-      prevButton: options.prevButton
-    }, defineProperty(_options, 'prevButton', options.prevButton), defineProperty(_options, 'nextButton', options.nextButton), defineProperty(_options, 'fadeIn', options.fadeIn), defineProperty(_options, 'fadeInDuration', options.fadeInDuration), defineProperty(_options, 'touchevents', options.touchevents), defineProperty(_options, 'customTransition', options.customTransition), defineProperty(_options, 'loop', options.loop), _options);
-=======
       prevButton: options.prevButton,
       nextButton: options.nextButton,
       fadeIn: options.fadeIn,
       fadeInDuration: options.fadeInDuration,
       touchevents: options.touchevents,
-      customTransition: options.customTransition
+      customTransition: options.customTransition,
+      loop: options.loop
     };
->>>>>>> b802308a8e8ef2bc0bf3966516be8e9f32508d51
 
     this.allowPagination = true;
     this.current = 0;
@@ -311,7 +307,6 @@ var Fullpage = function () {
         if (e.type === 'swd') {
           this.paginateToNext(false);
         }      }
-<<<<<<< HEAD
       if (this.options.loop) {
         if (this.next > this.sections.length - 1) {
           this.next = 0;
@@ -325,9 +320,7 @@ var Fullpage = function () {
         if (this.next === this.current) return;
       } else {
         if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
-      }
-=======
-      if (this.next === this.sections.length - 1) {
+      }      if (this.next === this.sections.length - 1) {
         this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
       } else {
         this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
@@ -338,7 +331,6 @@ var Fullpage = function () {
       }
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
 
->>>>>>> b802308a8e8ef2bc0bf3966516be8e9f32508d51
       this.allowPagination = false;
 
       this.navigation.forEach(function (btn) {
@@ -462,7 +454,7 @@ var next = document.querySelector('.js-next');
 var fullpage = new Fullpage(page, {
   easing: 'ease-out',
   navigation: nav,
-  fadeIn: true,
+  fadeIn: false,
   fadeInDuration: 1000,
   renderNavButton: function renderNavButton(i) {
     return '0' + (i + 1);
