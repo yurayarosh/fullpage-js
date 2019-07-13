@@ -13,7 +13,7 @@ const next = document.querySelector('.js-next');
 const fullpage = new Fullpage(page, {
   easing: 'ease-out',
   navigation: nav,
-  fadeIn: false,
+  fadeIn: true,
   fadeInDuration: 1000,
   renderNavButton: (i) => {
     return '0' + (i + 1);
@@ -21,14 +21,15 @@ const fullpage = new Fullpage(page, {
   prevButton: prev,
   nextButton: next,
   touchevents: true,
-  customTransition: false
+  customTransition: false,
+  loop: true
 });
 fullpage.onExit = (section, resolve) => {
   console.log('EXIT animation is hapening');
   setTimeout(() => {
     console.log('EXIT animaton has finished in this section', section);
     resolve();
-  }, 1000);
+  }, 500);
 };
 fullpage.onEnter = (section) => {
   console.log('ENTER animation has started in this section', section);

@@ -23,7 +23,8 @@ export class Fullpage {
       fadeIn: false,
       fadeInDuration: 500,
       touchevents: false,
-      customTransition: false
+      customTransition: false,
+      loop: false
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = {
@@ -39,6 +40,7 @@ export class Fullpage {
       fadeInDuration: options.fadeInDuration,
       touchevents: options.touchevents,
       customTransition: options.customTransition,
+      loop: options.loop,
     };
 
     this.allowPagination = true;
@@ -119,9 +121,23 @@ export class Fullpage {
       if (e.type === 'swd') {
         this.paginateToNext(false);
       };
-    };    
+    };
 
-    if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
+    if (this.options.loop) {
+      if (this.next > this.sections.length - 1) {        
+        this.next = 0;
+        this.loopTo = 'first';
+      } else if (this.next < 0) {
+        this.next = this.sections.length - 1;
+        this.loopTo = 'last';
+      } else {
+        this.loopTo = false;
+      };
+
+      if (this.next === this.current) return;
+    } else {
+      if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
+    };    
 
     this.allowPagination = false;
 

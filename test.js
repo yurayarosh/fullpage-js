@@ -228,7 +228,8 @@ var Fullpage = function () {
       fadeIn: false,
       fadeInDuration: 500,
       touchevents: false,
-      customTransition: false
+      customTransition: false,
+      loop: false
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = (_options = {
@@ -238,7 +239,7 @@ var Fullpage = function () {
       navigation: options.navigation,
       renderNavButton: options.renderNavButton,
       prevButton: options.prevButton
-    }, defineProperty(_options, 'prevButton', options.prevButton), defineProperty(_options, 'nextButton', options.nextButton), defineProperty(_options, 'fadeIn', options.fadeIn), defineProperty(_options, 'fadeInDuration', options.fadeInDuration), defineProperty(_options, 'touchevents', options.touchevents), defineProperty(_options, 'customTransition', options.customTransition), _options);
+    }, defineProperty(_options, 'prevButton', options.prevButton), defineProperty(_options, 'nextButton', options.nextButton), defineProperty(_options, 'fadeIn', options.fadeIn), defineProperty(_options, 'fadeInDuration', options.fadeInDuration), defineProperty(_options, 'touchevents', options.touchevents), defineProperty(_options, 'customTransition', options.customTransition), defineProperty(_options, 'loop', options.loop), _options);
 
     this.allowPagination = true;
     this.current = 0;
@@ -317,8 +318,20 @@ var Fullpage = function () {
         if (e.type === 'swd') {
           this.paginateToNext(false);
         }      }
-      if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
-
+      if (this.options.loop) {
+        if (this.next > this.sections.length - 1) {
+          this.next = 0;
+          this.loopTo = 'first';
+        } else if (this.next < 0) {
+          this.next = this.sections.length - 1;
+          this.loopTo = 'last';
+        } else {
+          this.loopTo = false;
+        }
+        if (this.next === this.current) return;
+      } else {
+        if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
+      }
       this.allowPagination = false;
 
       this.navigation.forEach(function (btn) {
@@ -437,7 +450,7 @@ var next = document.querySelector('.js-next');
 var fullpage = new Fullpage(page, {
   easing: 'ease-out',
   navigation: nav,
-  fadeIn: false,
+  fadeIn: true,
   fadeInDuration: 1000,
   renderNavButton: function renderNavButton(i) {
     return '0' + (i + 1);
@@ -445,14 +458,15 @@ var fullpage = new Fullpage(page, {
   prevButton: prev,
   nextButton: next,
   touchevents: true,
-  customTransition: false
+  customTransition: false,
+  loop: true
 });
 fullpage.onExit = function (section, resolve) {
   console.log('EXIT animation is hapening');
   setTimeout(function () {
     console.log('EXIT animaton has finished in this section', section);
     resolve();
-  }, 1000);
+  }, 500);
 };
 fullpage.onEnter = function (section) {
   console.log('ENTER animation has started in this section', section);
