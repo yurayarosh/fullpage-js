@@ -20,7 +20,7 @@ export default class Animator {
   animate() {
     this._onExit()
       .then(this._changeSection.bind(this))
-      .then(this._onEnter.bind(this));    
+      .then(this._onEnter.bind(this));
   };
 
   getSectionTop(section) {

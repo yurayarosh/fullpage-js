@@ -4,7 +4,7 @@ import Animator from './Animator';
 
 checkPropertiesSupport();
 
-export function addFpTouchEvents() {
+export function addTouchEvents() {
   createTouchEvents(document);
 };
 
@@ -46,13 +46,17 @@ export class Fullpage {
     this.current = 0;
   };
 
-  init() {    
+  init() {
     this._addElementsAttributes();
     this._crateNavigation();
 
     this.paginateBinded = this.paginate.bind(this);
 
     this._paginate();
+
+    if (this.afterLoad) {
+      this.afterLoad();
+    };
   };
 
   paginateToNext(condition) {
@@ -80,7 +84,20 @@ export class Fullpage {
 
   paginateOnPrevNextClick(e, prevBtn, nextBtn) {
     e.preventDefault();
-    this.paginateToNext(nextBtn);    
+    this.paginateToNext(nextBtn);
+  };
+
+  toggleDisableButtonsClasses() {
+    if (this.next === this.sections.length - 1) {
+      this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
+    } else {
+      this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
+    };
+    if (this.next === 0) {
+      this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+    } else {
+      this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
+    };
   };
 
   paginate(e) {
@@ -109,7 +126,7 @@ export class Fullpage {
       if (navBtn === null
           && anchorBtn === null
           && prevBtn === null
-          && nextBtn === null) return;      
+          && nextBtn === null) return;
     };
 
     if (this.options.touchevents) {
@@ -123,7 +140,7 @@ export class Fullpage {
     };
 
     if (this.options.loop) {
-      if (this.next > this.sections.length - 1) {        
+      if (this.next > this.sections.length - 1) {
         this.next = 0;
         this.loopTo = 'first';
       } else if (this.next < 0) {
@@ -136,17 +153,11 @@ export class Fullpage {
       if (this.next === this.current) return;
     } else {
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
+    };
+
+    if(!this.options.loop) {
+      this.toggleDisableButtonsClasses();
     };    
-    if (this.next === this.sections.length - 1) {
-      this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
-    } else {
-      this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
-    };
-    if (this.next === 0) {
-      this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
-    } else {
-      this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
-    };
 
     if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
 
@@ -207,9 +218,11 @@ export class Fullpage {
     };
 
     // add prevButton disabled class
-    if (this.current === 0) {
-      this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
-    };
+    if (!this.options.loop) {
+      if (this.current === 0) {
+        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+      };
+    };    
   };
 
   _paginate() {
@@ -260,6 +273,6 @@ Fullpage.constants = {
   navButton: 'fullpage-nav__button',
   prev: 'fullpage__prev',
   next: 'fullpage__next',
-  anchor: 'data-anchor',
+  anchor: 'data-fullpage-anchor',
   index: 'data-fullpage-index'
 };

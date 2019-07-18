@@ -42,7 +42,6 @@
    .fullpage__section:nth-child(even){
     background-color: orange;
    }
-
    .fullpage__nav{
     position: fixed;
     top: 50%;
@@ -50,13 +49,16 @@
     transform: translate(0, -50%);
     z-index: 10;
     width: 30px;
-   }
-   
+   }   
    .fullpage__btns{
     position: fixed;
     z-index: 10;
     bottom: 20px;
     left: 20px;
+   }
+   .fullpage__prev.is-disabled, .fullpage__next.is-disabled {
+    opacity: .5;
+    pointer-events: none;
    }
 
    .fullpage-nav__item {
@@ -64,10 +66,6 @@
    }
    .fullpage-nav__button.is-active {
     color: orange;
-   }
-   .fullpage__prev.is-disabled, .fullpage__next.is-disabled {
-    opacity: .5;
-    pointer-events: none;
    }
   </style>
 </head>
@@ -85,8 +83,8 @@
     <div class="fullpage__nav js-fullpage-nav"></div>
 
     <div class="fullpage__btns">
-      <button class="" data-anchor="#section-1">to section-1</button>
-      <button class="" data-anchor="#section-5">to section-5</button>
+      <button class="" data-fullpage-anchor="#section-1">to section-1</button>
+      <button class="" data-fullpage-anchor="#section-5">to section-5</button>
       <button class="js-prev">prev</button>
       <button class="js-next">next</button>
     </div>    

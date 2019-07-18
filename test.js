@@ -191,7 +191,7 @@ Animator.classNames = {
 
 checkPropertiesSupport();
 
-function addFpTouchEvents() {
+function addTouchEvents() {
   createTouchEvents(document);
 }
 var Fullpage = function () {
@@ -243,7 +243,10 @@ var Fullpage = function () {
       this.paginateBinded = this.paginate.bind(this);
 
       this._paginate();
-    }
+
+      if (this.afterLoad) {
+        this.afterLoad();
+      }    }
   }, {
     key: 'paginateToNext',
     value: function paginateToNext(condition) {
@@ -275,6 +278,18 @@ var Fullpage = function () {
       e.preventDefault();
       this.paginateToNext(nextBtn);
     }
+  }, {
+    key: 'toggleDisableButtonsClasses',
+    value: function toggleDisableButtonsClasses() {
+      if (this.next === this.sections.length - 1) {
+        this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
+      } else {
+        this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      }      if (this.next === 0) {
+        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+      } else {
+        this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      }    }
   }, {
     key: 'paginate',
     value: function paginate(e) {
@@ -320,14 +335,9 @@ var Fullpage = function () {
         if (this.next === this.current) return;
       } else {
         if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
-      }      if (this.next === this.sections.length - 1) {
-        this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
-      } else {
-        this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
-      }      if (this.next === 0) {
-        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
-      } else {
-        this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      }
+      if (!this.options.loop) {
+        this.toggleDisableButtonsClasses();
       }
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
 
@@ -386,9 +396,10 @@ var Fullpage = function () {
         this.options.nextButton.classList.add(Fullpage.constants.next);
       }
       // add prevButton disabled class
-      if (this.current === 0) {
-        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
-      }    }
+      if (!this.options.loop) {
+        if (this.current === 0) {
+          this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+        }      }    }
   }, {
     key: '_paginate',
     value: function _paginate() {
@@ -439,12 +450,11 @@ Fullpage.constants = {
   navButton: 'fullpage-nav__button',
   prev: 'fullpage__prev',
   next: 'fullpage__next',
-  anchor: 'data-anchor',
+  anchor: 'data-fullpage-anchor',
   index: 'data-fullpage-index'
 };
 
-// commands
-addFpTouchEvents();
+addTouchEvents();
 
 var page = document.querySelector('.js-fullpage');
 var nav = document.querySelector('.js-fullpage-nav');
@@ -463,7 +473,7 @@ var fullpage = new Fullpage(page, {
   nextButton: next,
   touchevents: true,
   customTransition: false,
-  loop: true
+  loop: false
 });
 fullpage.onExit = function (section, resolve) {
   console.log('EXIT animation is hapening');
@@ -474,5 +484,8 @@ fullpage.onExit = function (section, resolve) {
 };
 fullpage.onEnter = function (section) {
   console.log('ENTER animation has started in this section', section);
+};
+fullpage.afterLoad = function () {
+  console.log('hello from AFTERLOAD function');
 };
 fullpage.init();
