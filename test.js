@@ -97,7 +97,7 @@ var Animator = function () {
   createClass(Animator, [{
     key: 'animate',
     value: function animate() {
-      this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this));
+      this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this)).then(this._onComplete.bind(this));
     }
   }, {
     key: 'getSectionTop',
@@ -166,8 +166,21 @@ var Animator = function () {
   }, {
     key: '_onEnter',
     value: function _onEnter() {
-      if (this.onEnter) {
-        this.onEnter(this.next);
+      var _this4 = this;
+
+      return new Promise(function (resolve) {
+        if (_this4.onEnter) {
+          _this4.onEnter(_this4.next, resolve);
+        } else {
+          resolve();
+        }
+      });
+    }
+  }, {
+    key: '_onComplete',
+    value: function _onComplete() {
+      if (this.onComplete) {
+        this.onComplete.call(this);
       }    }
   }, {
     key: '_changeSection',
@@ -201,7 +214,6 @@ var Fullpage = function () {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.defaultParams = {
-      delay: 1400,
       transition: 500,
       easing: 'ease',
       navigation: false,
@@ -216,7 +228,6 @@ var Fullpage = function () {
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = {
-      delay: options.delay,
       transition: options.transition,
       easing: options.easing,
       navigation: options.navigation,
@@ -362,13 +373,14 @@ var Fullpage = function () {
         fadeInDuration: this.options.fadeInDuration,
         customTransition: this.options.customTransition
       });
-      this.animator.animate();
-
-      this.current = this.next;
-
-      setTimeout(function () {
+      this.animator.onComplete = function () {
+        if (_this.onComplete) {
+          _this.onComplete();
+        }
+        _this.current = _this.next;
         _this.allowPagination = true;
-      }, this.options.delay);
+      };
+      this.animator.animate();
     }
   }, {
     key: '_addElementsAttributes',
@@ -475,6 +487,9 @@ var fullpage = new Fullpage(page, {
   customTransition: false,
   loop: false
 });
+fullpage.afterLoad = function () {
+  console.log('hello from AFTERLOAD function');
+};
 fullpage.onExit = function (section, resolve) {
   console.log('EXIT animation is hapening');
   setTimeout(function () {
@@ -482,10 +497,13 @@ fullpage.onExit = function (section, resolve) {
     resolve();
   }, 500);
 };
-fullpage.onEnter = function (section) {
-  console.log('ENTER animation has started in this section', section);
+fullpage.onEnter = function (section, resolve) {
+  setTimeout(function () {
+    console.log('ENTER animation has finished in this section', section);
+    resolve();
+  }, 500);
 };
-fullpage.afterLoad = function () {
-  console.log('hello from AFTERLOAD function');
+fullpage.onComplete = function (section) {
+  console.log('this is ONCOMPETE function is triggering.');
 };
 fullpage.init();

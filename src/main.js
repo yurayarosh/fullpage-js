@@ -13,7 +13,6 @@ export class Fullpage {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.defaultParams = {
-      delay: 1400,
       transition: 500,
       easing: 'ease',
       navigation: false,
@@ -28,7 +27,6 @@ export class Fullpage {
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = {
-      delay: options.delay,
       transition: options.transition,
       easing: options.easing,
       navigation: options.navigation,
@@ -182,13 +180,15 @@ export class Fullpage {
       fadeInDuration: this.options.fadeInDuration,
       customTransition: this.options.customTransition
     });
-    this.animator.animate();
+    this.animator.onComplete = () => {
+      if (this.onComplete) {
+        this.onComplete();
+      };
 
-    this.current = this.next;
-
-    setTimeout(() => {
+      this.current = this.next;
       this.allowPagination = true;
-    }, this.options.delay);
+    };
+    this.animator.animate();
   };  
 
   _addElementsAttributes() {

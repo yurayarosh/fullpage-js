@@ -20,7 +20,8 @@ export default class Animator {
   animate() {
     this._onExit()
       .then(this._changeSection.bind(this))
-      .then(this._onEnter.bind(this));
+      .then(this._onEnter.bind(this))
+      .then(this._onComplete.bind(this));
   };
 
   getSectionTop(section) {
@@ -78,8 +79,18 @@ export default class Animator {
   };
 
   _onEnter() {
-    if (this.onEnter) {
-      this.onEnter(this.next);
+    return new Promise(resolve => {
+      if (this.onEnter) {
+        this.onEnter(this.next, resolve);
+      } else {
+        resolve();
+      }
+    });    
+  };
+
+  _onComplete() {
+    if (this.onComplete) {
+      this.onComplete.call(this);
     };
   };
 

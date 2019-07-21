@@ -20,6 +20,9 @@ const fullpage = new Fullpage(page, {
   customTransition: false,
   loop: false
 });
+fullpage.afterLoad = () => {
+  console.log('hello from AFTERLOAD function');
+};
 fullpage.onExit = (section, resolve) => {
   console.log('EXIT animation is hapening');
   setTimeout(() => {
@@ -27,11 +30,14 @@ fullpage.onExit = (section, resolve) => {
     resolve();
   }, 500);
 };
-fullpage.onEnter = (section) => {
-  console.log('ENTER animation has started in this section', section);
+fullpage.onEnter = (section, resolve) => {
+  setTimeout(() => {
+    console.log('ENTER animation has finished in this section', section);
+    resolve();
+  }, 500);  
 };
-fullpage.afterLoad = () => {
-  console.log('hello from AFTERLOAD function');
+fullpage.onComplete = (section) => {
+  console.log('this is ONCOMPETE function is triggering.');
 };
 fullpage.init();
 
