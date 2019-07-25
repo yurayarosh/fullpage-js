@@ -268,8 +268,9 @@ var Fullpage = function () {
       var id = void 0;
       if (url.indexOf('#') !== -1) {
         id = url.substring(url.lastIndexOf('#'));
-      }      return id.slice(1);
-      // if (id.indexOf('http') === -1) {
+      }      if (id) {
+        return id.slice(1);
+      }      // if (id.indexOf('http') === -1) {
       //   return id.slice(1);
       // };    
     }
