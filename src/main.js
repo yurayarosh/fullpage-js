@@ -52,9 +52,25 @@ export class Fullpage {
 
     this._paginate();
 
+    if (this.getIdFromUrl() && this.getIdFromUrl().length > 1) {
+      this._paginateOnLoad();
+    };
+
     if (this.afterLoad) {
       this.afterLoad();
     };
+  };
+
+  getIdFromUrl() {
+    const url = window.location.href;
+    let id;
+    if (url.indexOf('#') !== -1) {
+      id = url.substring(url.lastIndexOf('#'));
+    };
+    return id.slice(1);
+    // if (id.indexOf('http') === -1) {
+    //   return id.slice(1);
+    // };    
   };
 
   paginateToNext(condition) {
@@ -74,7 +90,12 @@ export class Fullpage {
 
   paginateOnAnchorClick(e, btn) {
       const id = btn.getAttribute(Fullpage.constants.anchor);
-      const targetSection = document.querySelector(id);
+      let targetSection;
+
+      this.sections.forEach(section => {
+        const currentId = section.hasAttribute(Fullpage.constants.anchorId) ? section.getAttribute(Fullpage.constants.anchorId) : null;
+        if (currentId === id) targetSection = section;
+      });
 
       this.next = +targetSection.getAttribute(Fullpage.constants.index);;
       this.direction = this.next > this.current ? 1 : -1;
@@ -135,6 +156,16 @@ export class Fullpage {
       if (e.type === 'swd') {
         this.paginateToNext(false);
       };
+    };
+
+    if (!e.type) {
+      let id = e;
+
+      this.sections.forEach((section, i) => {
+        if (section.hasAttribute(Fullpage.constants.anchorId, id)) {
+          this.next = i;
+        };
+      });
     };
 
     if (this.options.loop) {
@@ -233,6 +264,10 @@ export class Fullpage {
     });
   };
 
+  _paginateOnLoad() {
+    this.paginate(this.getIdFromUrl());
+  };
+
   _crateNavigation() {
     if(!this.options.navigation) return;
 
@@ -274,5 +309,6 @@ Fullpage.constants = {
   prev: 'fullpage__prev',
   next: 'fullpage__next',
   anchor: 'data-fullpage-anchor',
+  anchorId: 'data-fullpage-id',
   index: 'data-fullpage-index'
 };

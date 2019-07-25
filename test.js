@@ -255,9 +255,24 @@ var Fullpage = function () {
 
       this._paginate();
 
+      if (this.getIdFromUrl() && this.getIdFromUrl().length > 1) {
+        this._paginateOnLoad();
+      }
       if (this.afterLoad) {
         this.afterLoad();
       }    }
+  }, {
+    key: 'getIdFromUrl',
+    value: function getIdFromUrl() {
+      var url = window.location.href;
+      var id = void 0;
+      if (url.indexOf('#') !== -1) {
+        id = url.substring(url.lastIndexOf('#'));
+      }      return id.slice(1);
+      // if (id.indexOf('http') === -1) {
+      //   return id.slice(1);
+      // };    
+    }
   }, {
     key: 'paginateToNext',
     value: function paginateToNext(condition) {
@@ -279,7 +294,12 @@ var Fullpage = function () {
     key: 'paginateOnAnchorClick',
     value: function paginateOnAnchorClick(e, btn) {
       var id = btn.getAttribute(Fullpage.constants.anchor);
-      var targetSection = document.querySelector(id);
+      var targetSection = void 0;
+
+      this.sections.forEach(function (section) {
+        var currentId = section.hasAttribute(Fullpage.constants.anchorId) ? section.getAttribute(Fullpage.constants.anchorId) : null;
+        if (currentId === id) targetSection = section;
+      });
 
       this.next = +targetSection.getAttribute(Fullpage.constants.index);      this.direction = this.next > this.current ? 1 : -1;
     }
@@ -333,6 +353,14 @@ var Fullpage = function () {
         if (e.type === 'swd') {
           this.paginateToNext(false);
         }      }
+      if (!e.type) {
+        var id = e;
+
+        this.sections.forEach(function (section, i) {
+          if (section.hasAttribute(Fullpage.constants.anchorId, id)) {
+            _this.next = i;
+          }        });
+      }
       if (this.options.loop) {
         if (this.next > this.sections.length - 1) {
           this.next = 0;
@@ -424,6 +452,11 @@ var Fullpage = function () {
       });
     }
   }, {
+    key: '_paginateOnLoad',
+    value: function _paginateOnLoad() {
+      this.paginate(this.getIdFromUrl());
+    }
+  }, {
     key: '_crateNavigation',
     value: function _crateNavigation() {
       if (!this.options.navigation) return;
@@ -463,6 +496,7 @@ Fullpage.constants = {
   prev: 'fullpage__prev',
   next: 'fullpage__next',
   anchor: 'data-fullpage-anchor',
+  anchorId: 'data-fullpage-id',
   index: 'data-fullpage-index'
 };
 
