@@ -13,6 +13,7 @@ export class Fullpage {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.defaultParams = {
+      delay: 1000,
       transition: 500,
       easing: 'ease',
       navigation: false,
@@ -27,6 +28,7 @@ export class Fullpage {
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = {
+      delay: options.delay,
       transition: options.transition,
       easing: options.easing,
       navigation: options.navigation,
@@ -41,7 +43,7 @@ export class Fullpage {
     };
 
     this.allowPagination = true;
-    this.current = 0;
+    this.current = 0;    
   };
 
   init() {
@@ -69,10 +71,7 @@ export class Fullpage {
     };
     if (id) {
       return id.slice(1);
-    };    
-    // if (id.indexOf('http') === -1) {
-    //   return id.slice(1);
-    // };    
+    };
   };
 
   paginateToNext(condition) {
@@ -199,6 +198,8 @@ export class Fullpage {
     });
     this.navigation[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
 
+    this.startTime = new Date().getTime();
+
     // animation goes here
     this.animator = new Animator({
       direction: this.direction,
@@ -219,7 +220,16 @@ export class Fullpage {
       };
 
       this.current = this.next;
-      this.allowPagination = true;
+
+      const duration = this.animator.finishTime - this.startTime;
+      if (duration < this.options.delay) {
+        setTimeout(() => {
+          this.allowPagination = true;
+        }, this.options.delay);
+      } else {
+        this.allowPagination = true;
+      };
+      
     };
     this.animator.animate();
   };  

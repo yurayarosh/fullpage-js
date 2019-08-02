@@ -179,6 +179,7 @@ var Animator = function () {
   }, {
     key: '_onComplete',
     value: function _onComplete() {
+      this.finishTime = new Date().getTime();
       if (this.onComplete) {
         this.onComplete.call(this);
       }    }
@@ -214,6 +215,7 @@ var Fullpage = function () {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.defaultParams = {
+      delay: 1000,
       transition: 500,
       easing: 'ease',
       navigation: false,
@@ -228,6 +230,7 @@ var Fullpage = function () {
     };
     options = Object.assign({}, this.defaultParams, options);
     this.options = {
+      delay: options.delay,
       transition: options.transition,
       easing: options.easing,
       navigation: options.navigation,
@@ -270,10 +273,7 @@ var Fullpage = function () {
         id = url.substring(url.lastIndexOf('#'));
       }      if (id) {
         return id.slice(1);
-      }      // if (id.indexOf('http') === -1) {
-      //   return id.slice(1);
-      // };    
-    }
+      }    }
   }, {
     key: 'paginateToNext',
     value: function paginateToNext(condition) {
@@ -388,6 +388,8 @@ var Fullpage = function () {
       });
       this.navigation[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
 
+      this.startTime = new Date().getTime();
+
       // animation goes here
       this.animator = new Animator({
         direction: this.direction,
@@ -407,8 +409,15 @@ var Fullpage = function () {
           _this.onComplete();
         }
         _this.current = _this.next;
-        _this.allowPagination = true;
-      };
+
+        var duration = _this.animator.finishTime - _this.startTime;
+        if (duration < _this.options.delay) {
+          setTimeout(function () {
+            _this.allowPagination = true;
+          }, _this.options.delay);
+        } else {
+          _this.allowPagination = true;
+        }      };
       this.animator.animate();
     }
   }, {

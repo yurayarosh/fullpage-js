@@ -88,7 +88,7 @@ export default class Animator {
     });    
   };
 
-  _onComplete() {
+  _onComplete() {this.finishTime = new Date().getTime();
     if (this.onComplete) {
       this.onComplete.call(this);
     };
