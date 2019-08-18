@@ -1,68 +1,146 @@
 'use strict';
 
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(source, true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(source).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
 function checkPropertiesSupport() {
-  if (!Object.assign) {
-    console.warn('This browser does not support `Object.assign`. You should use polyfill.');
-  }  if (!Element.prototype.closest) {
+  if (!Element.prototype.closest) {
     console.warn('This browser does not support `closest` method. You should use polyfill.');
-  }  if (typeof Promise === "undefined" || Promise.toString().indexOf("[native code]") === -1) {
+  }
+
+  if (typeof Promise === "undefined" || Promise.toString().indexOf("[native code]") === -1) {
     console.warn('This browser does not support `Promise`. You should use polyfill.');
-  }}
+  }
+}
 function createTouchEvents(d) {
   var ce = function ce(e, n) {
-    var a = document.createEvent('CustomEvent');a.initCustomEvent(n, true, true, e.target);e.target.dispatchEvent(a);a = null;return false;
+    var a = document.createEvent('CustomEvent');
+    a.initCustomEvent(n, true, true, e.target);
+    e.target.dispatchEvent(a);
+    a = null;
+    return false;
   };
-  var nm = true;var sp = { x: 0, y: 0 };var ep = { x: 0, y: 0 };
+
+  var nm = true;
+  var sp = {
+    x: 0,
+    y: 0
+  };
+  var ep = {
+    x: 0,
+    y: 0
+  };
   var touch = {
     touchstart: function touchstart(e) {
-      sp = { x: e.touches[0].pageX, y: e.touches[0].pageY };
+      sp = {
+        x: e.touches[0].pageX,
+        y: e.touches[0].pageY
+      };
     },
     touchmove: function touchmove(e) {
-      nm = false;ep = { x: e.touches[0].pageX, y: e.touches[0].pageY };
+      nm = false;
+      ep = {
+        x: e.touches[0].pageX,
+        y: e.touches[0].pageY
+      };
     },
     touchend: function touchend(e) {
       if (nm) {
         ce(e, 'fc');
       } else {
-        var x = ep.x - sp.x;var xr = Math.abs(x);var y = ep.y - sp.y;var yr = Math.abs(y);if (Math.max(xr, yr) > 20) {
+        var x = ep.x - sp.x;
+        var xr = Math.abs(x);
+        var y = ep.y - sp.y;
+        var yr = Math.abs(y);
+
+        if (Math.max(xr, yr) > 20) {
           ce(e, xr > yr ? x < 0 ? 'swl' : 'swr' : y < 0 ? 'swu' : 'swd');
         }
-      }nm = true;
+      }
+
+      nm = true;
     },
     touchcancel: function touchcancel(e) {
       nm = false;
     }
   };
+
   for (var i in touch) {
     d.addEventListener(i, touch[i], false);
   }
 }
 
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-var Animator = function () {
+var Animator =
+/*#__PURE__*/
+function () {
   function Animator(_ref) {
     var direction = _ref.direction,
         sections = _ref.sections,
@@ -74,8 +152,10 @@ var Animator = function () {
         onEnter = _ref.onEnter,
         fadeIn = _ref.fadeIn,
         fadeInDuration = _ref.fadeInDuration,
-        customTransition = _ref.customTransition;
-    classCallCheck(this, Animator);
+        customTransition = _ref.customTransition,
+        toggleClassesFirst = _ref.toggleClassesFirst;
+
+    _classCallCheck(this, Animator);
 
     this.direction = direction;
     this.sections = sections;
@@ -92,67 +172,65 @@ var Animator = function () {
     this.fadeIn = fadeIn;
     this.fadeInDuration = fadeInDuration;
     this.customTransition = customTransition;
+    this.toggleClassesFirst = toggleClassesFirst;
   }
 
-  createClass(Animator, [{
-    key: 'animate',
+  _createClass(Animator, [{
+    key: "animate",
     value: function animate() {
       this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this)).then(this._onComplete.bind(this));
     }
   }, {
-    key: 'getSectionTop',
+    key: "getSectionTop",
     value: function getSectionTop(section) {
       var rect = section.getBoundingClientRect();
       return rect.top;
     }
   }, {
-    key: 'fadeToggle',
+    key: "fadeToggle",
     value: function fadeToggle() {
       var _this = this;
 
-      this.current.style.transition = 'opacity ' + this.fadeInDuration + 'ms';
+      this.current.style.transition = "opacity ".concat(this.fadeInDuration, "ms");
       this.current.style.opacity = 0;
-
       setTimeout(function () {
         _this.current.style.display = 'none';
         _this.current.style.transition = '';
+
         _this.current.classList.remove(Animator.classNames.IS_ACTIVE);
       }, this.fadeInDuration);
-
       this.next.classList.add(Animator.classNames.IS_ACTIVE);
       this.next.style.display = '';
-      this.next.style.transition = 'opacity ' + this.fadeInDuration + 'ms';
+      this.next.style.transition = "opacity ".concat(this.fadeInDuration, "ms");
       setTimeout(function () {
         _this.next.style.opacity = 1;
       }, 66);
     }
   }, {
-    key: 'scrollToSection',
+    key: "scrollToSection",
     value: function scrollToSection() {
       var _this2 = this;
 
       var wrapTop = this.getSectionTop(this.container);
-      var nextTop = this.getSectionTop(this.next) - wrapTop;
-      var currentTop = this.getSectionTop(this.current) - wrapTop;
+      var nextTop = this.getSectionTop(this.next) - wrapTop; // const currentTop = this.getSectionTop(this.current) - wrapTop;
 
       this.translate = nextTop;
-
-      this.container.style.transform = 'translate(0px, -' + this.translate + 'px)';
-      this.container.style.transition = 'transform ' + this.transition + 'ms ' + this.easing;
-
+      this.container.style.transform = "translate(0px, -".concat(this.translate, "px)");
+      this.container.style.transition = "transform ".concat(this.transition, "ms ").concat(this.easing);
       setTimeout(function () {
         _this2.container.style.transition = '';
+
         _this2.toggleActiveClasses();
       }, this.transition);
     }
   }, {
-    key: 'toggleActiveClasses',
+    key: "toggleActiveClasses",
     value: function toggleActiveClasses() {
       this.current.classList.remove(Animator.classNames.IS_ACTIVE);
       this.next.classList.add(Animator.classNames.IS_ACTIVE);
     }
   }, {
-    key: '_onExit',
+    key: "_onExit",
     value: function _onExit() {
       var _this3 = this;
 
@@ -161,10 +239,11 @@ var Animator = function () {
           _this3.onExit(_this3.current, resolve);
         } else {
           resolve();
-        }      });
+        }
+      });
     }
   }, {
-    key: '_onEnter',
+    key: "_onEnter",
     value: function _onEnter() {
       var _this4 = this;
 
@@ -177,14 +256,16 @@ var Animator = function () {
       });
     }
   }, {
-    key: '_onComplete',
+    key: "_onComplete",
     value: function _onComplete() {
       this.finishTime = new Date().getTime();
+
       if (this.onComplete) {
         this.onComplete.call(this);
-      }    }
+      }
+    }
   }, {
-    key: '_changeSection',
+    key: "_changeSection",
     value: function _changeSection() {
       if (this.fadeIn) {
         this.fadeToggle();
@@ -192,25 +273,25 @@ var Animator = function () {
         this.toggleActiveClasses();
       } else {
         this.scrollToSection();
-      }    }
+      }
+    }
   }]);
+
   return Animator;
 }();
-
 Animator.classNames = {
   IS_ACTIVE: 'is-active'
 };
 
-// import './polyfill';
-
 checkPropertiesSupport();
-
 function addTouchEvents() {
   createTouchEvents(document);
 }
-var Fullpage = function () {
+var Fullpage =
+/*#__PURE__*/
+function () {
   function Fullpage(container, options) {
-    classCallCheck(this, Fullpage);
+    _classCallCheck(this, Fullpage);
 
     this.container = container;
     this.sections = [].slice.call(this.container.children);
@@ -226,32 +307,19 @@ var Fullpage = function () {
       fadeInDuration: 500,
       touchevents: false,
       customTransition: false,
-      loop: false
+      loop: false,
+      toggleClassesFirst: false
     };
-    options = Object.assign({}, this.defaultParams, options);
-    this.options = {
-      delay: options.delay,
-      transition: options.transition,
-      easing: options.easing,
-      navigation: options.navigation,
-      renderNavButton: options.renderNavButton,
-      prevButton: options.prevButton,
-      nextButton: options.nextButton,
-      fadeIn: options.fadeIn,
-      fadeInDuration: options.fadeInDuration,
-      touchevents: options.touchevents,
-      customTransition: options.customTransition,
-      loop: options.loop
-    };
-
+    this.options = _objectSpread2({}, this.defaultParams, {}, options);
     this.allowPagination = true;
     this.current = 0;
   }
 
-  createClass(Fullpage, [{
-    key: 'init',
+  _createClass(Fullpage, [{
+    key: "init",
     value: function init() {
       this._addElementsAttributes();
+
       this._crateNavigation();
 
       this.paginateBinded = this.paginate.bind(this);
@@ -261,69 +329,75 @@ var Fullpage = function () {
       if (this.getIdFromUrl() && this.getIdFromUrl().length > 1) {
         this._paginateOnLoad();
       }
+
       if (this.afterLoad) {
         this.afterLoad();
-      }    }
+      }
+    }
   }, {
-    key: 'getIdFromUrl',
+    key: "getIdFromUrl",
     value: function getIdFromUrl() {
       var url = window.location.href;
-      var id = void 0;
+      var id;
+
       if (url.indexOf('#') !== -1) {
         id = url.substring(url.lastIndexOf('#'));
-      }      if (id) {
+      }
+
+      if (id) {
         return id.slice(1);
-      }    }
+      }
+    }
   }, {
-    key: 'paginateToNext',
+    key: "paginateToNext",
     value: function paginateToNext(condition) {
       this.direction = condition ? 1 : -1;
       this.next = this.current + this.direction;
     }
   }, {
-    key: 'paginateOnNavButtonClick',
+    key: "paginateOnNavButtonClick",
     value: function paginateOnNavButtonClick(e, btn) {
       e.preventDefault();
       var index = +btn.getAttribute(Fullpage.constants.index);
-
       if (typeof index !== 'number') return;
       this.next = index;
-
       this.direction = this.next > this.current ? 1 : -1;
     }
   }, {
-    key: 'paginateOnAnchorClick',
+    key: "paginateOnAnchorClick",
     value: function paginateOnAnchorClick(e, btn) {
       var id = btn.getAttribute(Fullpage.constants.anchor);
-      var targetSection = void 0;
-
+      var targetSection;
       this.sections.forEach(function (section) {
         var currentId = section.hasAttribute(Fullpage.constants.anchorId) ? section.getAttribute(Fullpage.constants.anchorId) : null;
         if (currentId === id) targetSection = section;
       });
-
-      this.next = +targetSection.getAttribute(Fullpage.constants.index);      this.direction = this.next > this.current ? 1 : -1;
+      this.next = +targetSection.getAttribute(Fullpage.constants.index);
+      this.direction = this.next > this.current ? 1 : -1;
     }
   }, {
-    key: 'paginateOnPrevNextClick',
+    key: "paginateOnPrevNextClick",
     value: function paginateOnPrevNextClick(e, prevBtn, nextBtn) {
       e.preventDefault();
       this.paginateToNext(nextBtn);
     }
   }, {
-    key: 'toggleDisableButtonsClasses',
+    key: "toggleDisableButtonsClasses",
     value: function toggleDisableButtonsClasses() {
       if (this.next === this.sections.length - 1) {
         this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
       } else {
         this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
-      }      if (this.next === 0) {
+      }
+
+      if (this.next === 0) {
         this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
       } else {
         this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
-      }    }
+      }
+    }
   }, {
-    key: 'paginate',
+    key: "paginate",
     value: function paginate(e) {
       var _this = this;
 
@@ -332,36 +406,46 @@ var Fullpage = function () {
       if (e.type === 'wheel') {
         this.paginateToNext(e.deltaY > 0);
       }
+
       if (e.type === 'click') {
-        var navBtn = e.target.closest('.' + Fullpage.constants.navButton);
-        var anchorBtn = e.target.closest('[' + Fullpage.constants.anchor + ']');
-        var prevBtn = e.target.closest('.' + Fullpage.constants.prev);
-        var nextBtn = e.target.closest('.' + Fullpage.constants.next);
+        var navBtn = e.target.closest(".".concat(Fullpage.constants.navButton));
+        var anchorBtn = e.target.closest("[".concat(Fullpage.constants.anchor, "]"));
+        var prevBtn = e.target.closest(".".concat(Fullpage.constants.prev));
+        var nextBtn = e.target.closest(".".concat(Fullpage.constants.next));
 
         if (navBtn) {
           this.paginateOnNavButtonClick(e, navBtn);
-        }        if (anchorBtn) {
+        }
+
+        if (anchorBtn) {
           this.paginateOnAnchorClick(e, anchorBtn);
-        }        if (prevBtn || nextBtn) {
+        }
+
+        if (prevBtn || nextBtn) {
           this.paginateOnPrevNextClick(e, prevBtn, nextBtn);
         }
         if (navBtn === null && anchorBtn === null && prevBtn === null && nextBtn === null) return;
       }
+
       if (this.options.touchevents) {
         if (e.type === 'swu') {
           this.paginateToNext(true);
         }
+
         if (e.type === 'swd') {
           this.paginateToNext(false);
-        }      }
+        }
+      }
+
       if (!e.type) {
         var id = e;
-
         this.sections.forEach(function (section, i) {
           if (section.hasAttribute(Fullpage.constants.anchorId, id)) {
             _this.next = i;
-          }        });
+          }
+        });
       }
+
       if (this.options.loop) {
         if (this.next > this.sections.length - 1) {
           this.next = 0;
@@ -376,21 +460,23 @@ var Fullpage = function () {
       } else {
         if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
       }
+
       if (!this.options.loop) {
         this.toggleDisableButtonsClasses();
       }
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
-
       this.allowPagination = false;
-
       this.navigation.forEach(function (btn) {
         btn.classList.remove(Fullpage.constants.IS_ACTIVE);
       });
       this.navigation[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
 
-      this.startTime = new Date().getTime();
+      if (this.options.toggleClassesFirst) {
+        this.sections[this.current].classList.remove(Fullpage.constants.IS_ACTIVE);
+        this.sections[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
+      }
+      this.startTime = new Date().getTime(); // animation goes here
 
-      // animation goes here
       this.animator = new Animator({
         direction: this.direction,
         sections: this.sections,
@@ -402,26 +488,30 @@ var Fullpage = function () {
         onEnter: this.onEnter,
         fadeIn: this.options.fadeIn,
         fadeInDuration: this.options.fadeInDuration,
-        customTransition: this.options.customTransition
+        customTransition: this.options.customTransition,
+        toggleClassesFirst: this.options.toggleClassesFirst
       });
+
       this.animator.onComplete = function () {
         if (_this.onComplete) {
           _this.onComplete();
         }
         _this.current = _this.next;
-
         var duration = _this.animator.finishTime - _this.startTime;
+
         if (duration < _this.options.delay) {
           setTimeout(function () {
             _this.allowPagination = true;
           }, _this.options.delay);
         } else {
           _this.allowPagination = true;
-        }      };
+        }
+      };
+
       this.animator.animate();
     }
   }, {
-    key: '_addElementsAttributes',
+    key: "_addElementsAttributes",
     value: function _addElementsAttributes() {
       // add sections fade class
       if (this.options.fadeIn) {
@@ -431,69 +521,73 @@ var Fullpage = function () {
         });
         this.sections[0].style.opacity = 1;
       }
-      // add first section active class
-      this.sections[0].classList.add(Fullpage.constants.IS_ACTIVE);
 
-      // add section indexes
+      this.sections[0].classList.add(Fullpage.constants.IS_ACTIVE); // add section indexes
+
       this.sections.forEach(function (section, i) {
         section.setAttribute(Fullpage.constants.index, i);
-      });
+      }); // add prev next buttons class names
 
-      // add prev next buttons class names
       if (this.options.prevButton) {
         this.options.prevButton.classList.add(Fullpage.constants.prev);
-      }      if (this.options.nextButton) {
+      }
+
+      if (this.options.nextButton) {
         this.options.nextButton.classList.add(Fullpage.constants.next);
       }
-      // add prevButton disabled class
+
       if (!this.options.loop) {
         if (this.current === 0) {
           this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
-        }      }    }
+        }
+      }
+    }
   }, {
-    key: '_paginate',
+    key: "_paginate",
     value: function _paginate() {
       var _this2 = this;
 
       var events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-
       events.forEach(function (event) {
         document.addEventListener(event, _this2.paginateBinded);
       });
     }
   }, {
-    key: '_paginateOnLoad',
+    key: "_paginateOnLoad",
     value: function _paginateOnLoad() {
       this.paginate(this.getIdFromUrl());
     }
   }, {
-    key: '_crateNavigation',
+    key: "_crateNavigation",
     value: function _crateNavigation() {
       if (!this.options.navigation) return;
-
       var nav = this.options.navigation;
-      nav.innerHTML = '<ul class="' + Fullpage.constants.navList + '"></ul>';
+      nav.innerHTML = "<ul class=\"".concat(Fullpage.constants.navList, "\"></ul>");
 
       for (var i = 0; i < this.sections.length; i++) {
         var list = nav.querySelector('ul');
         var item = document.createElement('li');
         item.className = Fullpage.constants.navItem;
-        if (this.options.renderNavButton) {
 
+        if (this.options.renderNavButton) {
           if (i === 0) {
-            item.innerHTML = '<button class="' + Fullpage.constants.navButton + ' ' + Fullpage.constants.IS_ACTIVE + '" ' + Fullpage.constants.index + '="' + i + '">' + this.options.renderNavButton(i) + '</button>';
+            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, " ").concat(Fullpage.constants.IS_ACTIVE, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
           } else {
-            item.innerHTML = '<button class="' + Fullpage.constants.navButton + '" ' + Fullpage.constants.index + '="' + i + '">' + this.options.renderNavButton(i) + '</button>';
-          }        } else {
+            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
+          }
+        } else {
           if (i === 0) {
-            item.innerHTML = '<button class="' + Fullpage.constants.navButton + ' ' + Fullpage.constants.IS_ACTIVE + '" ' + Fullpage.constants.index + '="' + i + '">' + (i + 1) + '</button>';
+            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, " ").concat(Fullpage.constants.IS_ACTIVE, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
           } else {
-            item.innerHTML = '<button class="' + Fullpage.constants.navButton + '" ' + Fullpage.constants.index + '="' + i + '">' + (i + 1) + '</button>';
-          }        }
+            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
+          }
+        }
         list.appendChild(item);
-      }      this.navigation = [].slice.call(nav.querySelectorAll('.' + Fullpage.constants.navButton));
+      }
+      this.navigation = [].slice.call(nav.querySelectorAll(".".concat(Fullpage.constants.navButton)));
     }
   }]);
+
   return Fullpage;
 }();
 Fullpage.constants = {
@@ -511,16 +605,14 @@ Fullpage.constants = {
 };
 
 addTouchEvents();
-
 var page = document.querySelector('.js-fullpage');
 var nav = document.querySelector('.js-fullpage-nav');
 var prev = document.querySelector('.js-prev');
 var next = document.querySelector('.js-next');
-
 var fullpage = new Fullpage(page, {
   easing: 'ease-out',
   navigation: nav,
-  fadeIn: false,
+  fadeIn: true,
   fadeInDuration: 1000,
   renderNavButton: function renderNavButton(i) {
     return '0' + (i + 1);
@@ -529,11 +621,14 @@ var fullpage = new Fullpage(page, {
   nextButton: next,
   touchevents: true,
   customTransition: false,
-  loop: false
+  loop: false,
+  toggleClassesFirst: true
 });
+
 fullpage.afterLoad = function () {
   console.log('hello from AFTERLOAD function');
 };
+
 fullpage.onExit = function (section, resolve) {
   console.log('EXIT animation is hapening');
   setTimeout(function () {
@@ -541,13 +636,16 @@ fullpage.onExit = function (section, resolve) {
     resolve();
   }, 500);
 };
+
 fullpage.onEnter = function (section, resolve) {
   setTimeout(function () {
     console.log('ENTER animation has finished in this section', section);
     resolve();
   }, 500);
 };
-fullpage.onComplete = function (section) {
+
+fullpage.onComplete = function () {
   console.log('this is ONCOMPETE function is triggering.');
 };
+
 fullpage.init();

@@ -9,16 +9,17 @@ const next = document.querySelector('.js-next');
 const fullpage = new Fullpage(page, {
   easing: 'ease-out',
   navigation: nav,
-  fadeIn: false,
+  fadeIn: true,
   fadeInDuration: 1000,
-  renderNavButton: (i) => {
+  renderNavButton: i => {
     return '0' + (i + 1);
   },
   prevButton: prev,
   nextButton: next,
   touchevents: true,
   customTransition: false,
-  loop: false
+  loop: false,
+  toggleClassesFirst: true
 });
 fullpage.afterLoad = () => {
   console.log('hello from AFTERLOAD function');
@@ -34,10 +35,9 @@ fullpage.onEnter = (section, resolve) => {
   setTimeout(() => {
     console.log('ENTER animation has finished in this section', section);
     resolve();
-  }, 500);  
+  }, 500);
 };
-fullpage.onComplete = (section) => {
+fullpage.onComplete = () => {
   console.log('this is ONCOMPETE function is triggering.');
 };
 fullpage.init();
-

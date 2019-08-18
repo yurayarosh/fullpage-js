@@ -1,7 +1,11 @@
 {
   "name": "fullpage-pagination",
   "description": "JS plugin for making fullpage pagination",
-  "version": "1.1.1",
+  "version": "1.1.2",
+  "scripts": {
+    "start": "rollup -c -w",
+    "build": "rollup -c"
+  },
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -17,10 +21,10 @@
     "url": "https://github.com/yurayarosh/fullpage-pagination/issues"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-latest": "^6.24.1",
-    "rollup-plugin-babel": "^3.0.7",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-uglify": "^6.0.2"
   }
 }

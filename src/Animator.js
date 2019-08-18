@@ -1,5 +1,18 @@
 export default class Animator {
-  constructor({ direction, sections, from, to, transition, easing, onExit, onEnter, fadeIn, fadeInDuration, customTransition }) {
+  constructor({
+    direction,
+    sections,
+    from,
+    to,
+    transition,
+    easing,
+    onExit,
+    onEnter,
+    fadeIn,
+    fadeInDuration,
+    customTransition,
+    toggleClassesFirst
+  }) {
     this.direction = direction;
     this.sections = sections;
     this.from = from;
@@ -15,6 +28,7 @@ export default class Animator {
     this.fadeIn = fadeIn;
     this.fadeInDuration = fadeInDuration;
     this.customTransition = customTransition;
+    this.toggleClassesFirst = toggleClassesFirst;
   };
 
   animate() {
@@ -50,7 +64,7 @@ export default class Animator {
   scrollToSection() {
     const wrapTop = this.getSectionTop(this.container);
     const nextTop = this.getSectionTop(this.next) - wrapTop;
-    const currentTop = this.getSectionTop(this.current) - wrapTop;
+    // const currentTop = this.getSectionTop(this.current) - wrapTop;
 
     this.translate = nextTop;
 
@@ -61,6 +75,7 @@ export default class Animator {
       this.container.style.transition = '';
       this.toggleActiveClasses();
     }, this.transition);
+    
   };
 
   toggleActiveClasses() {

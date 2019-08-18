@@ -1,7 +1,4 @@
 export function checkPropertiesSupport() {
-  if (!Object.assign) {
-    console.warn('This browser does not support `Object.assign`. You should use polyfill.');
-  };
   if (!Element.prototype.closest) {
     console.warn('This browser does not support `closest` method. You should use polyfill.');
   };

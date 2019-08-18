@@ -24,26 +24,12 @@ export class Fullpage {
       fadeInDuration: 500,
       touchevents: false,
       customTransition: false,
-      loop: false
+      loop: false,
+      toggleClassesFirst: false
     };
-    options = Object.assign({}, this.defaultParams, options);
-    this.options = {
-      delay: options.delay,
-      transition: options.transition,
-      easing: options.easing,
-      navigation: options.navigation,
-      renderNavButton: options.renderNavButton,
-      prevButton: options.prevButton,
-      nextButton: options.nextButton,
-      fadeIn: options.fadeIn,
-      fadeInDuration: options.fadeInDuration,
-      touchevents: options.touchevents,
-      customTransition: options.customTransition,
-      loop: options.loop,
-    };
-
+    this.options = {...this.defaultParams, ...options};
     this.allowPagination = true;
-    this.current = 0;    
+    this.current = 0;
   };
 
   init() {
@@ -198,6 +184,11 @@ export class Fullpage {
     });
     this.navigation[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
 
+    if (this.options.toggleClassesFirst) {
+      this.sections[this.current].classList.remove(Fullpage.constants.IS_ACTIVE);
+      this.sections[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
+    };
+
     this.startTime = new Date().getTime();
 
     // animation goes here
@@ -212,7 +203,8 @@ export class Fullpage {
       onEnter: this.onEnter,
       fadeIn: this.options.fadeIn,
       fadeInDuration: this.options.fadeInDuration,
-      customTransition: this.options.customTransition
+      customTransition: this.options.customTransition,
+      toggleClassesFirst: this.options.toggleClassesFirst
     });
     this.animator.onComplete = () => {
       if (this.onComplete) {

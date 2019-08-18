@@ -56,7 +56,8 @@ Standart options
   fadeInDuration: 500, // fade effect duration
   customTransition: false, // no effects, just toggle active classnames
   touchevents: false, // pagination on touchevents
-  loop: false // loop option
+  loop: false, // loop option
+  toggleClassesFirst: false // if true - toggle sections classes before animation
 }
 ```
 
