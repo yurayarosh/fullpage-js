@@ -18,3 +18,14 @@ export function createTouchEvents(d) {
   };
   for (var i in touch) { d.addEventListener(i, touch[i], false); }
 };
+
+export function getIdFromUrl() {
+  const url = window.location.href;
+  let id;
+  if (url.indexOf('#') !== -1) {
+    id = url.substring(url.lastIndexOf('#'));
+  };
+  if (id) {
+    return id.slice(1);
+  };
+};

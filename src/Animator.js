@@ -1,3 +1,5 @@
+import constants from './components/constants';
+
 export default class Animator {
   constructor({
     direction,
@@ -38,6 +40,10 @@ export default class Animator {
       .then(this._onComplete.bind(this));
   };
 
+  destroy() {
+    this._removeStyles();
+  }
+
   getSectionTop(section) {
     const rect = section.getBoundingClientRect();
     return rect.top;
@@ -50,10 +56,10 @@ export default class Animator {
     setTimeout(() => {
       this.current.style.display = 'none';
       this.current.style.transition = '';
-      this.current.classList.remove(Animator.classNames.IS_ACTIVE);
+      this.current.classList.remove(constants.IS_ACTIVE);
     }, this.fadeInDuration);
 
-    this.next.classList.add(Animator.classNames.IS_ACTIVE);
+    this.next.classList.add(constants.IS_ACTIVE);
     this.next.style.display = '';
     this.next.style.transition = `opacity ${this.fadeInDuration}ms`;
     setTimeout(() => {
@@ -79,8 +85,8 @@ export default class Animator {
   };
 
   toggleActiveClasses() {
-    this.current.classList.remove(Animator.classNames.IS_ACTIVE);
-    this.next.classList.add(Animator.classNames.IS_ACTIVE);
+    this.current.classList.remove(constants.IS_ACTIVE);
+    this.next.classList.add(constants.IS_ACTIVE);
   };
 
   _onExit() {
@@ -103,7 +109,8 @@ export default class Animator {
     });    
   };
 
-  _onComplete() {this.finishTime = new Date().getTime();
+  _onComplete() {
+    this.finishTime = new Date().getTime();
     if (this.onComplete) {
       this.onComplete.call(this);
     };
@@ -118,8 +125,12 @@ export default class Animator {
       this.scrollToSection();
     };        
   };
-};
 
-Animator.classNames = {
-  IS_ACTIVE: 'is-active'
+  _removeStyles() {
+    this.sections.forEach((section) => {
+      section.style.opacity = '';
+      section.style.display = '';
+      section.style.transition = '';
+    })
+  }
 };
