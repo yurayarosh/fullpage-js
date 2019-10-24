@@ -1,7 +1,7 @@
 {
   "name": "fullpage-pagination",
   "description": "JS plugin for making fullpage pagination",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "scripts": {
     "start": "rollup -c -w",
     "build": "rollup -c"
