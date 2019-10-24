@@ -71,6 +71,84 @@ function _objectSpread2(target) {
   return target;
 }
 
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return self;
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (typeof call === "object" || typeof call === "function")) {
+    return call;
+  }
+
+  return _assertThisInitialized(self);
+}
+
+function _superPropBase(object, property) {
+  while (!Object.prototype.hasOwnProperty.call(object, property)) {
+    object = _getPrototypeOf(object);
+    if (object === null) break;
+  }
+
+  return object;
+}
+
+function _get(target, property, receiver) {
+  if (typeof Reflect !== "undefined" && Reflect.get) {
+    _get = Reflect.get;
+  } else {
+    _get = function _get(target, property, receiver) {
+      var base = _superPropBase(target, property);
+
+      if (!base) return;
+      var desc = Object.getOwnPropertyDescriptor(base, property);
+
+      if (desc.get) {
+        return desc.get.call(receiver);
+      }
+
+      return desc.value;
+    };
+  }
+
+  return _get(target, property, receiver || target);
+}
+
+var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
 function checkPropertiesSupport() {
   if (!Element.prototype.closest) {
     console.warn('This browser does not support `closest` method. You should use polyfill.');
@@ -81,6 +159,8 @@ function checkPropertiesSupport() {
   }
 }
 function createTouchEvents(d) {
+  if (!isTouch) return;
+
   var ce = function ce(e, n) {
     var a = document.createEvent('CustomEvent');
     a.initCustomEvent(n, true, true, e.target);
@@ -167,55 +247,35 @@ var constants = {
 var Animator =
 /*#__PURE__*/
 function () {
-  function Animator(_ref) {
-    var direction = _ref.direction,
-        sections = _ref.sections,
-        from = _ref.from,
-        to = _ref.to,
-        transition = _ref.transition,
-        easing = _ref.easing,
-        onExit = _ref.onExit,
-        onEnter = _ref.onEnter,
-        fadeIn = _ref.fadeIn,
-        fadeInDuration = _ref.fadeInDuration,
-        customTransition = _ref.customTransition,
-        toggleClassesFirst = _ref.toggleClassesFirst;
-
+  function Animator(paginator) {
     _classCallCheck(this, Animator);
 
-    this.direction = direction;
-    this.sections = sections;
-    this.from = from;
-    this.to = to;
-    this.current = sections[from];
-    this.next = sections[to];
-    this.container = this.sections[0].parentNode;
+    this.paginator = paginator, this.sections = paginator.sections;
+    this.from = paginator.current;
+    this.to = paginator.next;
+    this.current = this.sections[this.from];
+    this.next = this.sections[this.to];
+    this.container = paginator.container;
     this.translate = 0;
-    this.transition = transition;
-    this.easing = easing;
-    this.onExit = onExit;
-    this.onEnter = onEnter;
-    this.fadeIn = fadeIn;
-    this.fadeInDuration = fadeInDuration;
-    this.customTransition = customTransition;
-    this.toggleClassesFirst = toggleClassesFirst;
+    this.transition = paginator.options.transition;
+    this.easing = paginator.options.easing;
+    this.onExit = paginator.onExit;
+    this.onEnter = paginator.onEnter;
+    this.onComplete = paginator.onComplete;
+    this.fadeIn = paginator.options.fadeIn;
+    this.fadeInDuration = paginator.options.fadeInDuration;
+    this.customTransition = paginator.options.customTransition;
   }
 
   _createClass(Animator, [{
     key: "animate",
     value: function animate() {
-      this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this)).then(this._onComplete.bind(this));
+      this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this.paginator)).then(this._onComplete.bind(this.paginator)).then(this.finish.bind(this.paginator));
     }
   }, {
     key: "destroy",
     value: function destroy() {
       this._removeStyles();
-    }
-  }, {
-    key: "getSectionTop",
-    value: function getSectionTop(section) {
-      var rect = section.getBoundingClientRect();
-      return rect.top;
     }
   }, {
     key: "fadeToggle",
@@ -242,9 +302,8 @@ function () {
     value: function scrollToSection() {
       var _this2 = this;
 
-      var wrapTop = this.getSectionTop(this.container);
-      var nextTop = this.getSectionTop(this.next) - wrapTop; // const currentTop = this.getSectionTop(this.current) - wrapTop;
-
+      var wrapTop = this.container.getBoundingClientRect().top;
+      var nextTop = this.next.getBoundingClientRect().top - wrapTop;
       this.translate = nextTop;
       this.container.style.transform = "translate(0px, -".concat(this.translate, "px)");
       this.container.style.transition = "transform ".concat(this.transition, "ms ").concat(this.easing);
@@ -289,11 +348,17 @@ function () {
   }, {
     key: "_onComplete",
     value: function _onComplete() {
-      this.finishTime = new Date().getTime();
+      var _this5 = this;
 
-      if (this.onComplete) {
-        this.onComplete.call(this);
-      }
+      return new Promise(function (resolve) {
+        _this5.finishTime = new Date().getTime();
+
+        if (_this5.onComplete) {
+          _this5.onComplete(_this5.next, resolve);
+        } else {
+          resolve();
+        }
+      });
     }
   }, {
     key: "_changeSection",
@@ -349,8 +414,10 @@ function () {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.options = _objectSpread2({}, defaultParameters, {}, options);
+    this.events = this.options.touchevents && isTouch ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
     this.allowPagination = true;
     this.current = 0;
+    this.next = null;
   }
 
   _createClass(Fullpage, [{
@@ -404,7 +471,7 @@ function () {
       var id = btn.getAttribute(constants.anchor);
       var targetSection;
       this.sections.forEach(function (section) {
-        var currentId = section.hasAttribute(constants.anchorId) ? section.getAttribute(constants.anchorId) : null;
+        var currentId = section.getAttribute(constants.anchorId) || null;
         if (currentId === id) targetSection = section;
       });
       this.next = +targetSection.getAttribute(constants.index);
@@ -447,6 +514,7 @@ function () {
         var anchorBtn = e.target.closest("[".concat(constants.anchor, "]"));
         var prevBtn = e.target.closest(".".concat(constants.prev));
         var nextBtn = e.target.closest(".".concat(constants.next));
+        if (!navBtn && !anchorBtn && !prevBtn && !nextBtn) return;
 
         if (navBtn) {
           this.paginateOnNavButtonClick(e, navBtn);
@@ -459,7 +527,6 @@ function () {
         if (prevBtn || nextBtn) {
           this.paginateOnPrevNextClick(e, prevBtn, nextBtn);
         }
-        if (navBtn === null && anchorBtn === null && prevBtn === null && nextBtn === null) return;
       }
 
       if (this.options.touchevents) {
@@ -484,12 +551,8 @@ function () {
       if (this.options.loop) {
         if (this.next > this.sections.length - 1) {
           this.next = 0;
-          this.loopTo = 'first';
         } else if (this.next < 0) {
           this.next = this.sections.length - 1;
-          this.loopTo = 'last';
-        } else {
-          this.loopTo = false;
         }
         if (this.next === this.current) return;
       } else {
@@ -512,27 +575,11 @@ function () {
       }
       this.startTime = new Date().getTime(); // animation goes here
 
-      this.animator = new Animator({
-        direction: this.direction,
-        sections: this.sections,
-        from: this.current,
-        to: this.next,
-        transition: this.options.transition,
-        easing: this.options.easing,
-        onExit: this.onExit,
-        onEnter: this.onEnter,
-        fadeIn: this.options.fadeIn,
-        fadeInDuration: this.options.fadeInDuration,
-        customTransition: this.options.customTransition,
-        toggleClassesFirst: this.options.toggleClassesFirst
-      });
+      this.animator = new Animator(this);
 
-      this.animator.onComplete = function () {
-        if (_this.onComplete) {
-          _this.onComplete();
-        }
+      this.animator.finish = function () {
         _this.current = _this.next;
-        var duration = _this.animator.finishTime - _this.startTime;
+        var duration = _this.finishTime - _this.startTime;
 
         if (duration < _this.options.delay) {
           setTimeout(function () {
@@ -582,8 +629,7 @@ function () {
     value: function _paginate() {
       var _this2 = this;
 
-      var events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-      events.forEach(function (event) {
+      this.events.forEach(function (event) {
         document.addEventListener(event, _this2.paginateBinded);
       });
     }
@@ -626,8 +672,7 @@ function () {
     value: function _removeListeners() {
       var _this3 = this;
 
-      var events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-      events.forEach(function (event) {
+      this.events.forEach(function (event) {
         document.removeEventListener(event, _this3.paginateBinded);
       });
     }
@@ -653,47 +698,95 @@ function () {
 }();
 
 addTouchEvents();
+
+var MyFullpage =
+/*#__PURE__*/
+function (_Fullpage) {
+  _inherits(MyFullpage, _Fullpage);
+
+  function MyFullpage(page, options) {
+    var _this;
+
+    _classCallCheck(this, MyFullpage);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MyFullpage).call(this, page, options));
+    _this.prevButton = options.prevButton;
+    _this.nextButton = options.nextButton;
+    return _this;
+  }
+
+  _createClass(MyFullpage, [{
+    key: "afterLoad",
+    value: function afterLoad() {
+      console.log('hello from AFTERLOAD function');
+    }
+  }, {
+    key: "onExit",
+    value: function onExit(section, resolve) {
+      console.log('EXIT animation is hapening');
+      setTimeout(function () {
+        console.log('EXIT animaton has finished in this section', section);
+        resolve();
+      }, 500);
+    }
+  }, {
+    key: "onEnter",
+    value: function onEnter(section, resolve) {
+      setTimeout(function () {
+        console.log('ENTER animation has finished in this section', section);
+        resolve();
+      }, 500);
+    }
+  }, {
+    key: "onComplete",
+    value: function onComplete(section, resolve) {
+      var sections = this.sections;
+      var _this$animator = this.animator,
+          from = _this$animator.from,
+          to = _this$animator.to;
+      setTimeout(function () {
+        console.log('this is ONCOMPETE function is triggering.');
+        console.log('previous section', sections[from]);
+        console.log('current section', sections[to]);
+        resolve();
+      }, 1000);
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      _get(_getPrototypeOf(MyFullpage.prototype), "init", this).call(this);
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      _get(_getPrototypeOf(MyFullpage.prototype), "destroy", this).call(this);
+    }
+  }]);
+
+  return MyFullpage;
+}(Fullpage);
+
 var page = document.querySelector('.js-fullpage');
 var nav = document.querySelector('.js-fullpage-nav');
 var prev = document.querySelector('.js-prev');
 var next = document.querySelector('.js-next');
-var fullpage = new Fullpage(page, {
-  easing: 'ease-out',
-  navigation: nav,
-  fadeIn: true,
+var options = {
+  transition: 1000,
+  delay: 0,
+  easing: 'cubic-bezier(.17,.67,.24,1.02)',
+  touchevents: true,
+  customTransition: false,
+  fadeIn: false,
   fadeInDuration: 1000,
+  navigation: nav,
   renderNavButton: function renderNavButton(i) {
-    return '0' + (i + 1);
+    return i < 9 ? "0".concat(i + 1) : i + 1;
   },
   prevButton: prev,
   nextButton: next,
-  touchevents: true,
-  customTransition: false,
-  loop: false,
-  toggleClassesFirst: true
-});
-
-fullpage.afterLoad = function () {
-  console.log('hello from AFTERLOAD function');
+  loop: true,
+  toggleClassesFirst: false
 };
-
-fullpage.onExit = function (section, resolve) {
-  console.log('EXIT animation is hapening');
-  setTimeout(function () {
-    console.log('EXIT animaton has finished in this section', section);
-    resolve();
-  }, 500);
-};
-
-fullpage.onEnter = function (section, resolve) {
-  setTimeout(function () {
-    console.log('ENTER animation has finished in this section', section);
-    resolve();
-  }, 500);
-};
-
-fullpage.onComplete = function () {
-  console.log('this is ONCOMPETE function is triggering.');
-};
-
+var fullpage = new MyFullpage(page, options);
 fullpage.init();
+console.log(fullpage);

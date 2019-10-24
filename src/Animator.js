@@ -1,53 +1,36 @@
 import constants from './components/constants';
 
 export default class Animator {
-  constructor({
-    direction,
-    sections,
-    from,
-    to,
-    transition,
-    easing,
-    onExit,
-    onEnter,
-    fadeIn,
-    fadeInDuration,
-    customTransition,
-    toggleClassesFirst
-  }) {
-    this.direction = direction;
-    this.sections = sections;
-    this.from = from;
-    this.to = to;
-    this.current = sections[from];
-    this.next = sections[to];
-    this.container = this.sections[0].parentNode;
+  constructor(paginator) {
+    this.paginator = paginator,
+    this.sections = paginator.sections;
+    this.from = paginator.current;
+    this.to = paginator.next;
+    this.current = this.sections[this.from];
+    this.next = this.sections[this.to];
+    this.container = paginator.container;
     this.translate = 0;
-    this.transition = transition;
-    this.easing = easing;
-    this.onExit = onExit;
-    this.onEnter = onEnter;
-    this.fadeIn = fadeIn;
-    this.fadeInDuration = fadeInDuration;
-    this.customTransition = customTransition;
-    this.toggleClassesFirst = toggleClassesFirst;
+    this.transition = paginator.options.transition;
+    this.easing = paginator.options.easing;
+    this.onExit = paginator.onExit;    
+    this.onEnter = paginator.onEnter;
+    this.onComplete = paginator.onComplete;
+    this.fadeIn = paginator.options.fadeIn;
+    this.fadeInDuration = paginator.options.fadeInDuration;
+    this.customTransition = paginator.options.customTransition;
   };
 
   animate() {
     this._onExit()
       .then(this._changeSection.bind(this))
-      .then(this._onEnter.bind(this))
-      .then(this._onComplete.bind(this));
+      .then(this._onEnter.bind(this.paginator))
+      .then(this._onComplete.bind(this.paginator))
+      .then(this.finish.bind(this.paginator))
   };
 
   destroy() {
     this._removeStyles();
   }
-
-  getSectionTop(section) {
-    const rect = section.getBoundingClientRect();
-    return rect.top;
-  };
 
   fadeToggle() {
     this.current.style.transition = `opacity ${this.fadeInDuration}ms`;
@@ -68,9 +51,8 @@ export default class Animator {
   };
 
   scrollToSection() {
-    const wrapTop = this.getSectionTop(this.container);
-    const nextTop = this.getSectionTop(this.next) - wrapTop;
-    // const currentTop = this.getSectionTop(this.current) - wrapTop;
+    const wrapTop = this.container.getBoundingClientRect().top;
+    const nextTop = this.next.getBoundingClientRect().top - wrapTop;
 
     this.translate = nextTop;
 
@@ -80,8 +62,7 @@ export default class Animator {
     setTimeout(() => {
       this.container.style.transition = '';
       this.toggleActiveClasses();
-    }, this.transition);
-    
+    }, this.transition);    
   };
 
   toggleActiveClasses() {
@@ -110,10 +91,15 @@ export default class Animator {
   };
 
   _onComplete() {
-    this.finishTime = new Date().getTime();
-    if (this.onComplete) {
-      this.onComplete.call(this);
-    };
+    return new Promise(resolve => {
+      this.finishTime = new Date().getTime();
+      
+      if (this.onComplete) {
+        this.onComplete(this.next, resolve);
+      } else {
+        resolve();
+      }
+    });
   };
 
   _changeSection() {

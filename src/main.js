@@ -1,8 +1,12 @@
 // import './polyfill';
-import { checkPropertiesSupport, createTouchEvents, getIdFromUrl } from './helpers';
+import {
+  checkPropertiesSupport,
+  createTouchEvents,
+  getIdFromUrl,
+  isTouch } from './helpers';
 import Animator from './Animator';
 import constants from './components/constants';
-import defaultParameters from './components/defaultPataneters'
+import defaultParameters from './components/defaultParameters';
 
 checkPropertiesSupport();
 
@@ -15,8 +19,12 @@ export class Fullpage {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.options = { ...defaultParameters, ...options };
+    this.events = this.options.touchevents && isTouch 
+      ? ['wheel', 'click', 'swu', 'swd']
+      : ['wheel', 'click'];
     this.allowPagination = true;
     this.current = 0;
+    this.next = null;
   };
 
   init() {
@@ -63,11 +71,11 @@ export class Fullpage {
     let targetSection;
 
     this.sections.forEach(section => {
-      const currentId = section.hasAttribute(constants.anchorId) ? section.getAttribute(constants.anchorId) : null;
+      const currentId = section.getAttribute(constants.anchorId) || null;
       if (currentId === id) targetSection = section;
     });
 
-    this.next = +targetSection.getAttribute(constants.index);;
+    this.next = +targetSection.getAttribute(constants.index);
     this.direction = this.next > this.current ? 1 : -1;
   };
 
@@ -102,6 +110,11 @@ export class Fullpage {
       const prevBtn = e.target.closest(`.${constants.prev}`);
       const nextBtn = e.target.closest(`.${constants.next}`);
 
+      if (!navBtn
+        && !anchorBtn
+        && !prevBtn
+        && !nextBtn) return;
+
       if (navBtn) {
         this.paginateOnNavButtonClick(e, navBtn);
       };
@@ -110,12 +123,7 @@ export class Fullpage {
       };
       if (prevBtn || nextBtn) {
         this.paginateOnPrevNextClick(e, prevBtn, nextBtn);
-      };
-
-      if (navBtn === null
-        && anchorBtn === null
-        && prevBtn === null
-        && nextBtn === null) return;
+      };      
     };
 
     if (this.options.touchevents) {
@@ -141,12 +149,8 @@ export class Fullpage {
     if (this.options.loop) {
       if (this.next > this.sections.length - 1) {
         this.next = 0;
-        this.loopTo = 'first';
       } else if (this.next < 0) {
         this.next = this.sections.length - 1;
-        this.loopTo = 'last';
-      } else {
-        this.loopTo = false;
       };
 
       if (this.next === this.current) return;
@@ -175,28 +179,11 @@ export class Fullpage {
     this.startTime = new Date().getTime();
 
     // animation goes here
-    this.animator = new Animator({
-      direction: this.direction,
-      sections: this.sections,
-      from: this.current,
-      to: this.next,
-      transition: this.options.transition,
-      easing: this.options.easing,
-      onExit: this.onExit,
-      onEnter: this.onEnter,
-      fadeIn: this.options.fadeIn,
-      fadeInDuration: this.options.fadeInDuration,
-      customTransition: this.options.customTransition,
-      toggleClassesFirst: this.options.toggleClassesFirst
-    });
-    this.animator.onComplete = () => {
-      if (this.onComplete) {
-        this.onComplete();
-      };
-
+    this.animator = new Animator(this);
+    this.animator.finish = () => {
       this.current = this.next;
 
-      const duration = this.animator.finishTime - this.startTime;
+      const duration = this.finishTime - this.startTime;
       if (duration < this.options.delay) {
         setTimeout(() => {
           this.allowPagination = true;
@@ -204,7 +191,6 @@ export class Fullpage {
       } else {
         this.allowPagination = true;
       };
-
     };
     this.animator.animate();
   };
@@ -244,9 +230,7 @@ export class Fullpage {
   };
 
   _paginate() {
-    const events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-
-    events.forEach(event => {
+    this.events.forEach(event => {
       document.addEventListener(event, this.paginateBinded);
     });
   };
@@ -285,9 +269,7 @@ export class Fullpage {
   };
 
   _removeListeners() {
-    const events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-
-    events.forEach(event => {
+    this.events.forEach(event => {
       document.removeEventListener(event, this.paginateBinded);
     });
   }

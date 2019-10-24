@@ -1,3 +1,5 @@
+export const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
+
 export function checkPropertiesSupport() {
   if (!Element.prototype.closest) {
     console.warn('This browser does not support `closest` method. You should use polyfill.');
@@ -8,6 +10,7 @@ export function checkPropertiesSupport() {
 };
 
 export function createTouchEvents(d) {
+  if(!isTouch) return;
   var ce = function(e, n) { var a = document.createEvent('CustomEvent'); a.initCustomEvent(n, true, true, e.target); e.target.dispatchEvent(a); a = null; return false; };
   var nm = true; var sp = { x: 0, y: 0 }; var ep = { x: 0, y: 0 };
   var touch = {
