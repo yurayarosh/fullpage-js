@@ -73,7 +73,7 @@ export default class Animator {
   _onExit() {
     return new Promise(resolve => {
       if (this.onExit) {
-        this.onExit(this.current, resolve);
+        this.onExit(this.animator.current, resolve);
       } else {
         resolve();
       };
@@ -83,7 +83,7 @@ export default class Animator {
   _onEnter() {
     return new Promise(resolve => {
       if (this.onEnter) {
-        this.onEnter(this.next, resolve);
+        this.onEnter(this.animator.next, resolve);
       } else {
         resolve();
       }
@@ -95,7 +95,7 @@ export default class Animator {
       this.finishTime = new Date().getTime();
       
       if (this.onComplete) {
-        this.onComplete(this.next, resolve);
+        this.onComplete(this.animator.next, resolve);
       } else {
         resolve();
       }

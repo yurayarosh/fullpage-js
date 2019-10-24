@@ -326,7 +326,7 @@ function () {
 
       return new Promise(function (resolve) {
         if (_this3.onExit) {
-          _this3.onExit(_this3.current, resolve);
+          _this3.onExit(_this3.animator.current, resolve);
         } else {
           resolve();
         }
@@ -339,7 +339,7 @@ function () {
 
       return new Promise(function (resolve) {
         if (_this4.onEnter) {
-          _this4.onEnter(_this4.next, resolve);
+          _this4.onEnter(_this4.animator.next, resolve);
         } else {
           resolve();
         }
@@ -354,7 +354,7 @@ function () {
         _this5.finishTime = new Date().getTime();
 
         if (_this5.onComplete) {
-          _this5.onComplete(_this5.next, resolve);
+          _this5.onComplete(_this5.animator.next, resolve);
         } else {
           resolve();
         }
