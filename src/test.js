@@ -8,32 +8,41 @@ class MyFullpage extends Fullpage {
     this.nextButton = options.nextButton;
   }
 
-  afterLoad() {
-    console.log('hello from AFTERLOAD function');
-  }
+  // afterLoad() {
+  //   console.log('hello from AFTERLOAD function');
+  // }
   onExit(section, resolve) {
-    console.log('EXIT animation is hapening');
-    setTimeout(() => {
-      console.log('EXIT animaton has finished in this section', section);
-      resolve();
-    }, 500);
+    console.log('exit', this);
+    resolve()
+    
+    // console.log('EXIT animation is hapening');
+    // setTimeout(() => {
+    //   console.log('EXIT animaton has finished in this section', section);
+    //   resolve();
+    // }, 500);
   }
   onEnter(section, resolve) {
-    setTimeout(() => {
-      console.log('ENTER animation has finished in this section', section);
-      resolve();
-    }, 500);
-  }
-  onComplete(section, resolve) {    
-    const { sections } = this;
-    const { from, to } = this.animator;   
+    console.log('enter', this);
+    resolve()
     
-    setTimeout(() => {
-      console.log('this is ONCOMPETE function is triggering.');
-      console.log('previous section', sections[from]);
-      console.log('current section', sections[to]);
-      resolve();
-    }, 1000);
+    // setTimeout(() => {
+    //   console.log('ENTER animation has finished in this section', section);
+    //   resolve();
+    // }, 500);
+  }
+  onComplete(section, resolve) {
+    console.log('complete', this);
+    resolve()
+     
+    // const { sections } = this;
+    // const { from, to } = this.animator;   
+    
+    // setTimeout(() => {
+    //   console.log('this is ONCOMPETE function is triggering.');
+    //   console.log('previous section', sections[from]);
+    //   console.log('current section', sections[to]);
+    //   resolve();
+    // }, 1000);
   }
 
   init() {
@@ -52,7 +61,7 @@ const next = document.querySelector('.js-next');
 
 const options = {
   transition: 1000,
-  delay: 0,
+  delay: 1000,
   easing: 'cubic-bezier(.17,.67,.24,1.02)',
   touchevents: true,
   customTransition: false,
@@ -70,7 +79,5 @@ const options = {
 
 const fullpage = new MyFullpage(page, options);
 fullpage.init();
-
-console.log(fullpage);
 
 

@@ -270,7 +270,7 @@ function () {
   _createClass(Animator, [{
     key: "animate",
     value: function animate() {
-      this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this.paginator)).then(this._onComplete.bind(this.paginator)).then(this.finish.bind(this.paginator));
+      this._onExit.call(this.paginator).then(this._changeSection.bind(this)).then(this._onEnter.bind(this.paginator)).then(this._onComplete.bind(this.paginator)).then(this.finish.bind(this.paginator));
     }
   }, {
     key: "destroy",
@@ -713,43 +713,42 @@ function (_Fullpage) {
     _this.prevButton = options.prevButton;
     _this.nextButton = options.nextButton;
     return _this;
-  }
+  } // afterLoad() {
+  //   console.log('hello from AFTERLOAD function');
+  // }
+
 
   _createClass(MyFullpage, [{
-    key: "afterLoad",
-    value: function afterLoad() {
-      console.log('hello from AFTERLOAD function');
-    }
-  }, {
     key: "onExit",
     value: function onExit(section, resolve) {
-      console.log('EXIT animation is hapening');
-      setTimeout(function () {
-        console.log('EXIT animaton has finished in this section', section);
-        resolve();
-      }, 500);
+      console.log('exit', this);
+      resolve(); // console.log('EXIT animation is hapening');
+      // setTimeout(() => {
+      //   console.log('EXIT animaton has finished in this section', section);
+      //   resolve();
+      // }, 500);
     }
   }, {
     key: "onEnter",
     value: function onEnter(section, resolve) {
-      setTimeout(function () {
-        console.log('ENTER animation has finished in this section', section);
-        resolve();
-      }, 500);
+      console.log('enter', this);
+      resolve(); // setTimeout(() => {
+      //   console.log('ENTER animation has finished in this section', section);
+      //   resolve();
+      // }, 500);
     }
   }, {
     key: "onComplete",
     value: function onComplete(section, resolve) {
-      var sections = this.sections;
-      var _this$animator = this.animator,
-          from = _this$animator.from,
-          to = _this$animator.to;
-      setTimeout(function () {
-        console.log('this is ONCOMPETE function is triggering.');
-        console.log('previous section', sections[from]);
-        console.log('current section', sections[to]);
-        resolve();
-      }, 1000);
+      console.log('complete', this);
+      resolve(); // const { sections } = this;
+      // const { from, to } = this.animator;   
+      // setTimeout(() => {
+      //   console.log('this is ONCOMPETE function is triggering.');
+      //   console.log('previous section', sections[from]);
+      //   console.log('current section', sections[to]);
+      //   resolve();
+      // }, 1000);
     }
   }, {
     key: "init",
@@ -772,7 +771,7 @@ var prev = document.querySelector('.js-prev');
 var next = document.querySelector('.js-next');
 var options = {
   transition: 1000,
-  delay: 0,
+  delay: 1000,
   easing: 'cubic-bezier(.17,.67,.24,1.02)',
   touchevents: true,
   customTransition: false,
@@ -789,4 +788,3 @@ var options = {
 };
 var fullpage = new MyFullpage(page, options);
 fullpage.init();
-console.log(fullpage);

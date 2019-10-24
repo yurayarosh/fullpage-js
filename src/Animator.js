@@ -21,7 +21,7 @@ export default class Animator {
   };
 
   animate() {
-    this._onExit()
+    this._onExit.call(this.paginator)
       .then(this._changeSection.bind(this))
       .then(this._onEnter.bind(this.paginator))
       .then(this._onComplete.bind(this.paginator))
