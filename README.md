@@ -2,7 +2,8 @@
 
 ### Example
 
-  * [Codesandbox](https://codesandbox.io/s/fullpage-pagination-example-srixb)
+  * [Basic](https://codesandbox.io/s/fullpage-pagination-example-srixb)
+  * [CustomTransitions](https://codesandbox.io/s/fullpage-pagination-custom-transition-mrrui)
 
 ### Install
 
