@@ -8,7 +8,7 @@
 ### Install
 
 ```html
-npm i fullpage-pagination -D
+npm i fullpage-pagination
 ```
 
 ```html
