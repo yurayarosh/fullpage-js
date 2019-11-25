@@ -71,6 +71,84 @@ function _objectSpread2(target) {
   return target;
 }
 
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return self;
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (typeof call === "object" || typeof call === "function")) {
+    return call;
+  }
+
+  return _assertThisInitialized(self);
+}
+
+function _superPropBase(object, property) {
+  while (!Object.prototype.hasOwnProperty.call(object, property)) {
+    object = _getPrototypeOf(object);
+    if (object === null) break;
+  }
+
+  return object;
+}
+
+function _get(target, property, receiver) {
+  if (typeof Reflect !== "undefined" && Reflect.get) {
+    _get = Reflect.get;
+  } else {
+    _get = function _get(target, property, receiver) {
+      var base = _superPropBase(target, property);
+
+      if (!base) return;
+      var desc = Object.getOwnPropertyDescriptor(base, property);
+
+      if (desc.get) {
+        return desc.get.call(receiver);
+      }
+
+      return desc.value;
+    };
+  }
+
+  return _get(target, property, receiver || target);
+}
+
+var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
 function checkPropertiesSupport() {
   if (!Element.prototype.closest) {
     console.warn('This browser does not support `closest` method. You should use polyfill.');
@@ -81,6 +159,8 @@ function checkPropertiesSupport() {
   }
 }
 function createTouchEvents(d) {
+  if (!isTouch) return;
+
   var ce = function ce(e, n) {
     var a = document.createEvent('CustomEvent');
     a.initCustomEvent(n, true, true, e.target);
@@ -137,54 +217,65 @@ function createTouchEvents(d) {
     d.addEventListener(i, touch[i], false);
   }
 }
+function getIdFromUrl() {
+  var url = window.location.href;
+  var id;
+
+  if (url.indexOf('#') !== -1) {
+    id = url.substring(url.lastIndexOf('#'));
+  }
+
+  if (id) {
+    return id.slice(1);
+  }
+}
+
+var constants = {
+  IS_ACTIVE: 'is-active',
+  IS_ABSOLUTE: 'is-absolute',
+  IS_DISABLED: 'is-disabled',
+  navList: 'fullpage-nav',
+  navItem: 'fullpage-nav__item',
+  navButton: 'fullpage-nav__button',
+  prev: 'fullpage__prev',
+  next: 'fullpage__next',
+  anchor: 'data-fullpage-anchor',
+  anchorId: 'data-fullpage-id',
+  index: 'data-fullpage-index'
+};
 
 var Animator =
 /*#__PURE__*/
 function () {
-  function Animator(_ref) {
-    var direction = _ref.direction,
-        sections = _ref.sections,
-        from = _ref.from,
-        to = _ref.to,
-        transition = _ref.transition,
-        easing = _ref.easing,
-        onExit = _ref.onExit,
-        onEnter = _ref.onEnter,
-        fadeIn = _ref.fadeIn,
-        fadeInDuration = _ref.fadeInDuration,
-        customTransition = _ref.customTransition,
-        toggleClassesFirst = _ref.toggleClassesFirst;
-
+  function Animator(paginator) {
     _classCallCheck(this, Animator);
 
-    this.direction = direction;
-    this.sections = sections;
-    this.from = from;
-    this.to = to;
-    this.current = sections[from];
-    this.next = sections[to];
-    this.container = this.sections[0].parentNode;
+    this.paginator = paginator, this.sections = paginator.sections;
+    this.from = paginator.current;
+    this.to = paginator.next;
+    this.current = this.sections[this.from];
+    this.next = this.sections[this.to];
+    this.container = paginator.container;
     this.translate = 0;
-    this.transition = transition;
-    this.easing = easing;
-    this.onExit = onExit;
-    this.onEnter = onEnter;
-    this.fadeIn = fadeIn;
-    this.fadeInDuration = fadeInDuration;
-    this.customTransition = customTransition;
-    this.toggleClassesFirst = toggleClassesFirst;
+    this.transition = paginator.options.transition;
+    this.easing = paginator.options.easing;
+    this.onExit = paginator.onExit;
+    this.onEnter = paginator.onEnter;
+    this.onComplete = paginator.onComplete;
+    this.fadeIn = paginator.options.fadeIn;
+    this.fadeInDuration = paginator.options.fadeInDuration;
+    this.customTransition = paginator.options.customTransition;
   }
 
   _createClass(Animator, [{
     key: "animate",
     value: function animate() {
-      this._onExit().then(this._changeSection.bind(this)).then(this._onEnter.bind(this)).then(this._onComplete.bind(this));
+      this._onExit.call(this.paginator).then(this._changeSection.bind(this)).then(this._onEnter.bind(this.paginator)).then(this._onComplete.bind(this.paginator)).then(this.finish.bind(this.paginator));
     }
   }, {
-    key: "getSectionTop",
-    value: function getSectionTop(section) {
-      var rect = section.getBoundingClientRect();
-      return rect.top;
+    key: "destroy",
+    value: function destroy() {
+      this._removeStyles();
     }
   }, {
     key: "fadeToggle",
@@ -197,9 +288,9 @@ function () {
         _this.current.style.display = 'none';
         _this.current.style.transition = '';
 
-        _this.current.classList.remove(Animator.classNames.IS_ACTIVE);
+        _this.current.classList.remove(constants.IS_ACTIVE);
       }, this.fadeInDuration);
-      this.next.classList.add(Animator.classNames.IS_ACTIVE);
+      this.next.classList.add(constants.IS_ACTIVE);
       this.next.style.display = '';
       this.next.style.transition = "opacity ".concat(this.fadeInDuration, "ms");
       setTimeout(function () {
@@ -211,9 +302,8 @@ function () {
     value: function scrollToSection() {
       var _this2 = this;
 
-      var wrapTop = this.getSectionTop(this.container);
-      var nextTop = this.getSectionTop(this.next) - wrapTop; // const currentTop = this.getSectionTop(this.current) - wrapTop;
-
+      var wrapTop = this.container.getBoundingClientRect().top;
+      var nextTop = this.next.getBoundingClientRect().top - wrapTop;
       this.translate = nextTop;
       this.container.style.transform = "translate(0px, -".concat(this.translate, "px)");
       this.container.style.transition = "transform ".concat(this.transition, "ms ").concat(this.easing);
@@ -226,8 +316,8 @@ function () {
   }, {
     key: "toggleActiveClasses",
     value: function toggleActiveClasses() {
-      this.current.classList.remove(Animator.classNames.IS_ACTIVE);
-      this.next.classList.add(Animator.classNames.IS_ACTIVE);
+      this.current.classList.remove(constants.IS_ACTIVE);
+      this.next.classList.add(constants.IS_ACTIVE);
     }
   }, {
     key: "_onExit",
@@ -236,7 +326,7 @@ function () {
 
       return new Promise(function (resolve) {
         if (_this3.onExit) {
-          _this3.onExit(_this3.current, resolve);
+          _this3.onExit(_this3.animator.current, resolve);
         } else {
           resolve();
         }
@@ -249,7 +339,7 @@ function () {
 
       return new Promise(function (resolve) {
         if (_this4.onEnter) {
-          _this4.onEnter(_this4.next, resolve);
+          _this4.onEnter(_this4.animator.next, resolve);
         } else {
           resolve();
         }
@@ -258,11 +348,17 @@ function () {
   }, {
     key: "_onComplete",
     value: function _onComplete() {
-      this.finishTime = new Date().getTime();
+      var _this5 = this;
 
-      if (this.onComplete) {
-        this.onComplete.call(this);
-      }
+      return new Promise(function (resolve) {
+        _this5.finishTime = new Date().getTime();
+
+        if (_this5.onComplete) {
+          _this5.onComplete(_this5.animator.next, resolve);
+        } else {
+          resolve();
+        }
+      });
     }
   }, {
     key: "_changeSection",
@@ -275,12 +371,34 @@ function () {
         this.scrollToSection();
       }
     }
+  }, {
+    key: "_removeStyles",
+    value: function _removeStyles() {
+      this.sections.forEach(function (section) {
+        section.style.opacity = '';
+        section.style.display = '';
+        section.style.transition = '';
+      });
+    }
   }]);
 
   return Animator;
 }();
-Animator.classNames = {
-  IS_ACTIVE: 'is-active'
+
+var defaultParameters = {
+  delay: 1000,
+  transition: 500,
+  easing: 'ease',
+  navigation: false,
+  renderNavButton: false,
+  prevButton: false,
+  nextButton: false,
+  fadeIn: false,
+  fadeInDuration: 500,
+  touchevents: false,
+  customTransition: false,
+  loop: false,
+  toggleClassesFirst: false
 };
 
 checkPropertiesSupport();
@@ -295,24 +413,11 @@ function () {
 
     this.container = container;
     this.sections = [].slice.call(this.container.children);
-    this.defaultParams = {
-      delay: 1000,
-      transition: 500,
-      easing: 'ease',
-      navigation: false,
-      renderNavButton: false,
-      prevButton: false,
-      nextButton: false,
-      fadeIn: false,
-      fadeInDuration: 500,
-      touchevents: false,
-      customTransition: false,
-      loop: false,
-      toggleClassesFirst: false
-    };
-    this.options = _objectSpread2({}, this.defaultParams, {}, options);
+    this.options = _objectSpread2({}, defaultParameters, {}, options);
+    this.events = this.options.touchevents && isTouch ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
     this.allowPagination = true;
     this.current = 0;
+    this.next = null;
   }
 
   _createClass(Fullpage, [{
@@ -326,7 +431,7 @@ function () {
 
       this._paginate();
 
-      if (this.getIdFromUrl() && this.getIdFromUrl().length > 1) {
+      if (getIdFromUrl() && getIdFromUrl().length > 1) {
         this._paginateOnLoad();
       }
 
@@ -335,18 +440,15 @@ function () {
       }
     }
   }, {
-    key: "getIdFromUrl",
-    value: function getIdFromUrl() {
-      var url = window.location.href;
-      var id;
+    key: "destroy",
+    value: function destroy() {
+      this._removeListeners();
 
-      if (url.indexOf('#') !== -1) {
-        id = url.substring(url.lastIndexOf('#'));
-      }
+      this._removeElementsAttributes();
 
-      if (id) {
-        return id.slice(1);
-      }
+      this._removeNavigation();
+
+      if (this.animator) this.animator.destroy();
     }
   }, {
     key: "paginateToNext",
@@ -358,7 +460,7 @@ function () {
     key: "paginateOnNavButtonClick",
     value: function paginateOnNavButtonClick(e, btn) {
       e.preventDefault();
-      var index = +btn.getAttribute(Fullpage.constants.index);
+      var index = +btn.getAttribute(constants.index);
       if (typeof index !== 'number') return;
       this.next = index;
       this.direction = this.next > this.current ? 1 : -1;
@@ -366,13 +468,13 @@ function () {
   }, {
     key: "paginateOnAnchorClick",
     value: function paginateOnAnchorClick(e, btn) {
-      var id = btn.getAttribute(Fullpage.constants.anchor);
+      var id = btn.getAttribute(constants.anchor);
       var targetSection;
       this.sections.forEach(function (section) {
-        var currentId = section.hasAttribute(Fullpage.constants.anchorId) ? section.getAttribute(Fullpage.constants.anchorId) : null;
+        var currentId = section.getAttribute(constants.anchorId) || null;
         if (currentId === id) targetSection = section;
       });
-      this.next = +targetSection.getAttribute(Fullpage.constants.index);
+      this.next = +targetSection.getAttribute(constants.index);
       this.direction = this.next > this.current ? 1 : -1;
     }
   }, {
@@ -385,15 +487,15 @@ function () {
     key: "toggleDisableButtonsClasses",
     value: function toggleDisableButtonsClasses() {
       if (this.next === this.sections.length - 1) {
-        this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
+        this.options.nextButton.classList.add(constants.IS_DISABLED);
       } else {
-        this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
+        this.options.nextButton.classList.remove(constants.IS_DISABLED);
       }
 
       if (this.next === 0) {
-        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+        this.options.prevButton.classList.add(constants.IS_DISABLED);
       } else {
-        this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
+        this.options.prevButton.classList.remove(constants.IS_DISABLED);
       }
     }
   }, {
@@ -408,10 +510,11 @@ function () {
       }
 
       if (e.type === 'click') {
-        var navBtn = e.target.closest(".".concat(Fullpage.constants.navButton));
-        var anchorBtn = e.target.closest("[".concat(Fullpage.constants.anchor, "]"));
-        var prevBtn = e.target.closest(".".concat(Fullpage.constants.prev));
-        var nextBtn = e.target.closest(".".concat(Fullpage.constants.next));
+        var navBtn = e.target.closest(".".concat(constants.navButton));
+        var anchorBtn = e.target.closest("[".concat(constants.anchor, "]"));
+        var prevBtn = e.target.closest(".".concat(constants.prev));
+        var nextBtn = e.target.closest(".".concat(constants.next));
+        if (!navBtn && !anchorBtn && !prevBtn && !nextBtn) return;
 
         if (navBtn) {
           this.paginateOnNavButtonClick(e, navBtn);
@@ -424,7 +527,6 @@ function () {
         if (prevBtn || nextBtn) {
           this.paginateOnPrevNextClick(e, prevBtn, nextBtn);
         }
-        if (navBtn === null && anchorBtn === null && prevBtn === null && nextBtn === null) return;
       }
 
       if (this.options.touchevents) {
@@ -440,7 +542,7 @@ function () {
       if (!e.type) {
         var id = e;
         this.sections.forEach(function (section, i) {
-          if (section.hasAttribute(Fullpage.constants.anchorId, id)) {
+          if (section.hasAttribute(constants.anchorId, id)) {
             _this.next = i;
           }
         });
@@ -449,12 +551,8 @@ function () {
       if (this.options.loop) {
         if (this.next > this.sections.length - 1) {
           this.next = 0;
-          this.loopTo = 'first';
         } else if (this.next < 0) {
           this.next = this.sections.length - 1;
-          this.loopTo = 'last';
-        } else {
-          this.loopTo = false;
         }
         if (this.next === this.current) return;
       } else {
@@ -467,37 +565,21 @@ function () {
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
       this.allowPagination = false;
       this.navigation.forEach(function (btn) {
-        btn.classList.remove(Fullpage.constants.IS_ACTIVE);
+        btn.classList.remove(constants.IS_ACTIVE);
       });
-      this.navigation[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
+      this.navigation[this.next].classList.add(constants.IS_ACTIVE);
 
       if (this.options.toggleClassesFirst) {
-        this.sections[this.current].classList.remove(Fullpage.constants.IS_ACTIVE);
-        this.sections[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
+        this.sections[this.current].classList.remove(constants.IS_ACTIVE);
+        this.sections[this.next].classList.add(constants.IS_ACTIVE);
       }
       this.startTime = new Date().getTime(); // animation goes here
 
-      this.animator = new Animator({
-        direction: this.direction,
-        sections: this.sections,
-        from: this.current,
-        to: this.next,
-        transition: this.options.transition,
-        easing: this.options.easing,
-        onExit: this.onExit,
-        onEnter: this.onEnter,
-        fadeIn: this.options.fadeIn,
-        fadeInDuration: this.options.fadeInDuration,
-        customTransition: this.options.customTransition,
-        toggleClassesFirst: this.options.toggleClassesFirst
-      });
+      this.animator = new Animator(this);
 
-      this.animator.onComplete = function () {
-        if (_this.onComplete) {
-          _this.onComplete();
-        }
+      this.animator.finish = function () {
         _this.current = _this.next;
-        var duration = _this.animator.finishTime - _this.startTime;
+        var duration = _this.finishTime - _this.startTime;
 
         if (duration < _this.options.delay) {
           setTimeout(function () {
@@ -516,29 +598,29 @@ function () {
       // add sections fade class
       if (this.options.fadeIn) {
         this.sections.forEach(function (section) {
-          section.classList.add(Fullpage.constants.IS_ABSOLUTE);
+          section.classList.add(constants.IS_ABSOLUTE);
           section.style.opacity = 0;
         });
         this.sections[0].style.opacity = 1;
       }
 
-      this.sections[0].classList.add(Fullpage.constants.IS_ACTIVE); // add section indexes
+      this.sections[0].classList.add(constants.IS_ACTIVE); // add section indexes
 
       this.sections.forEach(function (section, i) {
-        section.setAttribute(Fullpage.constants.index, i);
+        section.setAttribute(constants.index, i);
       }); // add prev next buttons class names
 
       if (this.options.prevButton) {
-        this.options.prevButton.classList.add(Fullpage.constants.prev);
+        this.options.prevButton.classList.add(constants.prev);
       }
 
       if (this.options.nextButton) {
-        this.options.nextButton.classList.add(Fullpage.constants.next);
+        this.options.nextButton.classList.add(constants.next);
       }
 
       if (!this.options.loop) {
         if (this.current === 0) {
-          this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+          this.options.prevButton.classList.add(constants.IS_DISABLED);
         }
       }
     }
@@ -547,105 +629,162 @@ function () {
     value: function _paginate() {
       var _this2 = this;
 
-      var events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-      events.forEach(function (event) {
+      this.events.forEach(function (event) {
         document.addEventListener(event, _this2.paginateBinded);
       });
     }
   }, {
     key: "_paginateOnLoad",
     value: function _paginateOnLoad() {
-      this.paginate(this.getIdFromUrl());
+      this.paginate(getIdFromUrl());
     }
   }, {
     key: "_crateNavigation",
     value: function _crateNavigation() {
       if (!this.options.navigation) return;
       var nav = this.options.navigation;
-      nav.innerHTML = "<ul class=\"".concat(Fullpage.constants.navList, "\"></ul>");
+      nav.innerHTML = "<ul class=\"".concat(constants.navList, "\"></ul>");
 
       for (var i = 0; i < this.sections.length; i++) {
         var list = nav.querySelector('ul');
         var item = document.createElement('li');
-        item.className = Fullpage.constants.navItem;
+        item.className = constants.navItem;
 
         if (this.options.renderNavButton) {
           if (i === 0) {
-            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, " ").concat(Fullpage.constants.IS_ACTIVE, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
+            item.innerHTML = "<button class=\"".concat(constants.navButton, " ").concat(constants.IS_ACTIVE, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
           } else {
-            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
+            item.innerHTML = "<button class=\"".concat(constants.navButton, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
           }
         } else {
           if (i === 0) {
-            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, " ").concat(Fullpage.constants.IS_ACTIVE, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
+            item.innerHTML = "<button class=\"".concat(constants.navButton, " ").concat(constants.IS_ACTIVE, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
           } else {
-            item.innerHTML = "<button class=\"".concat(Fullpage.constants.navButton, "\" ").concat(Fullpage.constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
+            item.innerHTML = "<button class=\"".concat(constants.navButton, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
           }
         }
         list.appendChild(item);
       }
-      this.navigation = [].slice.call(nav.querySelectorAll(".".concat(Fullpage.constants.navButton)));
+      this.navigation = [].slice.call(nav.querySelectorAll(".".concat(constants.navButton)));
+    }
+  }, {
+    key: "_removeListeners",
+    value: function _removeListeners() {
+      var _this3 = this;
+
+      this.events.forEach(function (event) {
+        document.removeEventListener(event, _this3.paginateBinded);
+      });
+    }
+  }, {
+    key: "_removeElementsAttributes",
+    value: function _removeElementsAttributes() {
+      this.sections.forEach(function (section) {
+        section.classList.remove(constants.IS_ACTIVE);
+        section.classList.remove(constants.IS_ABSOLUTE);
+        section.style.opacity = '';
+        section.removeAttribute(constants.index);
+      });
+    }
+  }, {
+    key: "_removeNavigation",
+    value: function _removeNavigation() {
+      if (!this.options.navigation) return;
+      this.options.navigation.innerHTML = '';
     }
   }]);
 
   return Fullpage;
 }();
-Fullpage.constants = {
-  IS_ACTIVE: 'is-active',
-  IS_ABSOLUTE: 'is-absolute',
-  IS_DISABLED: 'is-disabled',
-  navList: 'fullpage-nav',
-  navItem: 'fullpage-nav__item',
-  navButton: 'fullpage-nav__button',
-  prev: 'fullpage__prev',
-  next: 'fullpage__next',
-  anchor: 'data-fullpage-anchor',
-  anchorId: 'data-fullpage-id',
-  index: 'data-fullpage-index'
-};
 
 addTouchEvents();
+
+var MyFullpage =
+/*#__PURE__*/
+function (_Fullpage) {
+  _inherits(MyFullpage, _Fullpage);
+
+  function MyFullpage(page, options) {
+    var _this;
+
+    _classCallCheck(this, MyFullpage);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MyFullpage).call(this, page, options));
+    _this.prevButton = options.prevButton;
+    _this.nextButton = options.nextButton;
+    return _this;
+  } // afterLoad() {
+  //   console.log('hello from AFTERLOAD function');
+  // }
+
+
+  _createClass(MyFullpage, [{
+    key: "onExit",
+    value: function onExit(section, resolve) {
+      console.log('exit', this);
+      resolve(); // console.log('EXIT animation is hapening');
+      // setTimeout(() => {
+      //   console.log('EXIT animaton has finished in this section', section);
+      //   resolve();
+      // }, 500);
+    }
+  }, {
+    key: "onEnter",
+    value: function onEnter(section, resolve) {
+      console.log('enter', this);
+      resolve(); // setTimeout(() => {
+      //   console.log('ENTER animation has finished in this section', section);
+      //   resolve();
+      // }, 500);
+    }
+  }, {
+    key: "onComplete",
+    value: function onComplete(section, resolve) {
+      console.log('complete', this);
+      resolve(); // const { sections } = this;
+      // const { from, to } = this.animator;   
+      // setTimeout(() => {
+      //   console.log('this is ONCOMPETE function is triggering.');
+      //   console.log('previous section', sections[from]);
+      //   console.log('current section', sections[to]);
+      //   resolve();
+      // }, 1000);
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      _get(_getPrototypeOf(MyFullpage.prototype), "init", this).call(this);
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      _get(_getPrototypeOf(MyFullpage.prototype), "destroy", this).call(this);
+    }
+  }]);
+
+  return MyFullpage;
+}(Fullpage);
+
 var page = document.querySelector('.js-fullpage');
 var nav = document.querySelector('.js-fullpage-nav');
 var prev = document.querySelector('.js-prev');
 var next = document.querySelector('.js-next');
-var fullpage = new Fullpage(page, {
-  easing: 'ease-out',
-  navigation: nav,
-  fadeIn: true,
+var options = {
+  transition: 1000,
+  delay: 1000,
+  easing: 'cubic-bezier(.17,.67,.24,1.02)',
+  touchevents: true,
+  customTransition: false,
+  fadeIn: false,
   fadeInDuration: 1000,
+  navigation: nav,
   renderNavButton: function renderNavButton(i) {
-    return '0' + (i + 1);
+    return i < 9 ? "0".concat(i + 1) : i + 1;
   },
   prevButton: prev,
   nextButton: next,
-  touchevents: true,
-  customTransition: false,
-  loop: false,
-  toggleClassesFirst: true
-});
-
-fullpage.afterLoad = function () {
-  console.log('hello from AFTERLOAD function');
+  loop: true,
+  toggleClassesFirst: false
 };
-
-fullpage.onExit = function (section, resolve) {
-  console.log('EXIT animation is hapening');
-  setTimeout(function () {
-    console.log('EXIT animaton has finished in this section', section);
-    resolve();
-  }, 500);
-};
-
-fullpage.onEnter = function (section, resolve) {
-  setTimeout(function () {
-    console.log('ENTER animation has finished in this section', section);
-    resolve();
-  }, 500);
-};
-
-fullpage.onComplete = function () {
-  console.log('this is ONCOMPETE function is triggering.');
-};
-
+var fullpage = new MyFullpage(page, options);
 fullpage.init();

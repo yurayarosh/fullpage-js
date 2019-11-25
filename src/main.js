@@ -1,6 +1,12 @@
 // import './polyfill';
-import { checkPropertiesSupport, createTouchEvents } from './helpers';
+import {
+  checkPropertiesSupport,
+  createTouchEvents,
+  getIdFromUrl,
+  isTouch } from './helpers';
 import Animator from './Animator';
+import constants from './components/constants';
+import defaultParameters from './components/defaultParameters';
 
 checkPropertiesSupport();
 
@@ -12,24 +18,13 @@ export class Fullpage {
   constructor(container, options) {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
-    this.defaultParams = {
-      delay: 1000,
-      transition: 500,
-      easing: 'ease',
-      navigation: false,
-      renderNavButton: false,
-      prevButton: false,
-      nextButton: false,
-      fadeIn: false,
-      fadeInDuration: 500,
-      touchevents: false,
-      customTransition: false,
-      loop: false,
-      toggleClassesFirst: false
-    };
-    this.options = {...this.defaultParams, ...options};
+    this.options = { ...defaultParameters, ...options };
+    this.events = this.options.touchevents && isTouch 
+      ? ['wheel', 'click', 'swu', 'swd']
+      : ['wheel', 'click'];
     this.allowPagination = true;
     this.current = 0;
+    this.next = null;
   };
 
   init() {
@@ -40,7 +35,7 @@ export class Fullpage {
 
     this._paginate();
 
-    if (this.getIdFromUrl() && this.getIdFromUrl().length > 1) {
+    if (getIdFromUrl() && getIdFromUrl().length > 1) {
       this._paginateOnLoad();
     };
 
@@ -49,16 +44,12 @@ export class Fullpage {
     };
   };
 
-  getIdFromUrl() {
-    const url = window.location.href;
-    let id;
-    if (url.indexOf('#') !== -1) {
-      id = url.substring(url.lastIndexOf('#'));
-    };
-    if (id) {
-      return id.slice(1);
-    };
-  };
+  destroy() {
+    this._removeListeners();
+    this._removeElementsAttributes();
+    this._removeNavigation();
+    if(this.animator) this.animator.destroy();
+  }
 
   paginateToNext(condition) {
     this.direction = condition ? 1 : -1;
@@ -66,26 +57,26 @@ export class Fullpage {
   };
 
   paginateOnNavButtonClick(e, btn) {
-      e.preventDefault();
-      const index = +btn.getAttribute(Fullpage.constants.index);
+    e.preventDefault();
+    const index = +btn.getAttribute(constants.index);
 
-      if (typeof index !== 'number') return;
-      this.next = index;
+    if (typeof index !== 'number') return;
+    this.next = index;
 
-      this.direction = this.next > this.current ? 1 : -1;
+    this.direction = this.next > this.current ? 1 : -1;
   };
 
   paginateOnAnchorClick(e, btn) {
-      const id = btn.getAttribute(Fullpage.constants.anchor);
-      let targetSection;
+    const id = btn.getAttribute(constants.anchor);
+    let targetSection;
 
-      this.sections.forEach(section => {
-        const currentId = section.hasAttribute(Fullpage.constants.anchorId) ? section.getAttribute(Fullpage.constants.anchorId) : null;
-        if (currentId === id) targetSection = section;
-      });
+    this.sections.forEach(section => {
+      const currentId = section.getAttribute(constants.anchorId) || null;
+      if (currentId === id) targetSection = section;
+    });
 
-      this.next = +targetSection.getAttribute(Fullpage.constants.index);;
-      this.direction = this.next > this.current ? 1 : -1;
+    this.next = +targetSection.getAttribute(constants.index);
+    this.direction = this.next > this.current ? 1 : -1;
   };
 
   paginateOnPrevNextClick(e, prevBtn, nextBtn) {
@@ -95,14 +86,14 @@ export class Fullpage {
 
   toggleDisableButtonsClasses() {
     if (this.next === this.sections.length - 1) {
-      this.options.nextButton.classList.add(Fullpage.constants.IS_DISABLED);
+      this.options.nextButton.classList.add(constants.IS_DISABLED);
     } else {
-      this.options.nextButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      this.options.nextButton.classList.remove(constants.IS_DISABLED);
     };
     if (this.next === 0) {
-      this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+      this.options.prevButton.classList.add(constants.IS_DISABLED);
     } else {
-      this.options.prevButton.classList.remove(Fullpage.constants.IS_DISABLED);
+      this.options.prevButton.classList.remove(constants.IS_DISABLED);
     };
   };
 
@@ -114,10 +105,15 @@ export class Fullpage {
     };
 
     if (e.type === 'click') {
-      const navBtn = e.target.closest(`.${Fullpage.constants.navButton}`);
-      const anchorBtn = e.target.closest(`[${Fullpage.constants.anchor}]`);
-      const prevBtn = e.target.closest(`.${Fullpage.constants.prev}`);
-      const nextBtn = e.target.closest(`.${Fullpage.constants.next}`);
+      const navBtn = e.target.closest(`.${constants.navButton}`);
+      const anchorBtn = e.target.closest(`[${constants.anchor}]`);
+      const prevBtn = e.target.closest(`.${constants.prev}`);
+      const nextBtn = e.target.closest(`.${constants.next}`);
+
+      if (!navBtn
+        && !anchorBtn
+        && !prevBtn
+        && !nextBtn) return;
 
       if (navBtn) {
         this.paginateOnNavButtonClick(e, navBtn);
@@ -127,12 +123,7 @@ export class Fullpage {
       };
       if (prevBtn || nextBtn) {
         this.paginateOnPrevNextClick(e, prevBtn, nextBtn);
-      };
-
-      if (navBtn === null
-          && anchorBtn === null
-          && prevBtn === null
-          && nextBtn === null) return;
+      };      
     };
 
     if (this.options.touchevents) {
@@ -149,7 +140,7 @@ export class Fullpage {
       let id = e;
 
       this.sections.forEach((section, i) => {
-        if (section.hasAttribute(Fullpage.constants.anchorId, id)) {
+        if (section.hasAttribute(constants.anchorId, id)) {
           this.next = i;
         };
       });
@@ -158,12 +149,8 @@ export class Fullpage {
     if (this.options.loop) {
       if (this.next > this.sections.length - 1) {
         this.next = 0;
-        this.loopTo = 'first';
       } else if (this.next < 0) {
         this.next = this.sections.length - 1;
-        this.loopTo = 'last';
-      } else {
-        this.loopTo = false;
       };
 
       if (this.next === this.current) return;
@@ -171,49 +158,32 @@ export class Fullpage {
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
     };
 
-    if(!this.options.loop) {
+    if (!this.options.loop) {
       this.toggleDisableButtonsClasses();
-    };    
+    };
 
     if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
 
     this.allowPagination = false;
 
     this.navigation.forEach(btn => {
-      btn.classList.remove(Fullpage.constants.IS_ACTIVE);
+      btn.classList.remove(constants.IS_ACTIVE);
     });
-    this.navigation[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
+    this.navigation[this.next].classList.add(constants.IS_ACTIVE);
 
     if (this.options.toggleClassesFirst) {
-      this.sections[this.current].classList.remove(Fullpage.constants.IS_ACTIVE);
-      this.sections[this.next].classList.add(Fullpage.constants.IS_ACTIVE);
+      this.sections[this.current].classList.remove(constants.IS_ACTIVE);
+      this.sections[this.next].classList.add(constants.IS_ACTIVE);
     };
 
     this.startTime = new Date().getTime();
 
     // animation goes here
-    this.animator = new Animator({
-      direction: this.direction,
-      sections: this.sections,
-      from: this.current,
-      to: this.next,
-      transition: this.options.transition,
-      easing: this.options.easing,
-      onExit: this.onExit,
-      onEnter: this.onEnter,
-      fadeIn: this.options.fadeIn,
-      fadeInDuration: this.options.fadeInDuration,
-      customTransition: this.options.customTransition,
-      toggleClassesFirst: this.options.toggleClassesFirst
-    });
-    this.animator.onComplete = () => {
-      if (this.onComplete) {
-        this.onComplete();
-      };
-
+    this.animator = new Animator(this);
+    this.animator.finish = () => {
       this.current = this.next;
 
-      const duration = this.animator.finishTime - this.startTime;
+      const duration = this.finishTime - this.startTime;
       if (duration < this.options.delay) {
         setTimeout(() => {
           this.allowPagination = true;
@@ -221,98 +191,100 @@ export class Fullpage {
       } else {
         this.allowPagination = true;
       };
-      
     };
     this.animator.animate();
-  };  
+  };
 
   _addElementsAttributes() {
     // add sections fade class
     if (this.options.fadeIn) {
       this.sections.forEach(section => {
-        section.classList.add(Fullpage.constants.IS_ABSOLUTE);
+        section.classList.add(constants.IS_ABSOLUTE);
         section.style.opacity = 0;
       });
       this.sections[0].style.opacity = 1;
     };
-    
+
     // add first section active class
-    this.sections[0].classList.add(Fullpage.constants.IS_ACTIVE);
+    this.sections[0].classList.add(constants.IS_ACTIVE);
 
     // add section indexes
     this.sections.forEach((section, i) => {
-      section.setAttribute(Fullpage.constants.index, i);
+      section.setAttribute(constants.index, i);
     });
 
     // add prev next buttons class names
     if (this.options.prevButton) {
-      this.options.prevButton.classList.add(Fullpage.constants.prev);
+      this.options.prevButton.classList.add(constants.prev);
     };
     if (this.options.nextButton) {
-      this.options.nextButton.classList.add(Fullpage.constants.next);
+      this.options.nextButton.classList.add(constants.next);
     };
 
     // add prevButton disabled class
     if (!this.options.loop) {
       if (this.current === 0) {
-        this.options.prevButton.classList.add(Fullpage.constants.IS_DISABLED);
+        this.options.prevButton.classList.add(constants.IS_DISABLED);
       };
-    };    
+    };
   };
 
   _paginate() {
-    const events = this.options.touchevents ? ['wheel', 'click', 'swu', 'swd'] : ['wheel', 'click'];
-
-    events.forEach(event => {
+    this.events.forEach(event => {
       document.addEventListener(event, this.paginateBinded);
     });
   };
 
   _paginateOnLoad() {
-    this.paginate(this.getIdFromUrl());
+    this.paginate(getIdFromUrl());
   };
 
   _crateNavigation() {
-    if(!this.options.navigation) return;
+    if (!this.options.navigation) return;
 
     const nav = this.options.navigation;
-    nav.innerHTML = `<ul class="${Fullpage.constants.navList}"></ul>`;
+    nav.innerHTML = `<ul class="${constants.navList}"></ul>`;
 
     for (let i = 0; i < this.sections.length; i++) {
       const list = nav.querySelector('ul');
       const item = document.createElement('li');
-      item.className = Fullpage.constants.navItem;
+      item.className = constants.navItem;
       if (this.options.renderNavButton) {
-        
         if (i === 0) {
-          item.innerHTML = `<button class="${Fullpage.constants.navButton} ${Fullpage.constants.IS_ACTIVE}" ${Fullpage.constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
+          item.innerHTML = `<button class="${constants.navButton} ${constants.IS_ACTIVE}" ${constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
         } else {
-          item.innerHTML = `<button class="${Fullpage.constants.navButton}" ${Fullpage.constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
+          item.innerHTML = `<button class="${constants.navButton}" ${constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
         };
       } else {
         if (i === 0) {
-          item.innerHTML = `<button class="${Fullpage.constants.navButton} ${Fullpage.constants.IS_ACTIVE}" ${Fullpage.constants.index}="${i}">${i + 1}</button>`;
+          item.innerHTML = `<button class="${constants.navButton} ${constants.IS_ACTIVE}" ${constants.index}="${i}">${i + 1}</button>`;
         } else {
-          item.innerHTML = `<button class="${Fullpage.constants.navButton}" ${Fullpage.constants.index}="${i}">${i + 1}</button>`;
+          item.innerHTML = `<button class="${constants.navButton}" ${constants.index}="${i}">${i + 1}</button>`;
         };
-      };      
+      };
 
       list.appendChild(item);
     };
-    this.navigation = [].slice.call(nav.querySelectorAll(`.${Fullpage.constants.navButton}`));    
-  };  
-};
+    this.navigation = [].slice.call(nav.querySelectorAll(`.${constants.navButton}`));
+  };
 
-Fullpage.constants = {
-  IS_ACTIVE: 'is-active',
-  IS_ABSOLUTE: 'is-absolute',
-  IS_DISABLED: 'is-disabled',
-  navList: 'fullpage-nav',
-  navItem: 'fullpage-nav__item',
-  navButton: 'fullpage-nav__button',
-  prev: 'fullpage__prev',
-  next: 'fullpage__next',
-  anchor: 'data-fullpage-anchor',
-  anchorId: 'data-fullpage-id',
-  index: 'data-fullpage-index'
+  _removeListeners() {
+    this.events.forEach(event => {
+      document.removeEventListener(event, this.paginateBinded);
+    });
+  }
+
+  _removeElementsAttributes() {
+    this.sections.forEach(section => {
+      section.classList.remove(constants.IS_ACTIVE);
+      section.classList.remove(constants.IS_ABSOLUTE);
+      section.style.opacity = '';
+      section.removeAttribute(constants.index);
+    })
+  }
+
+  _removeNavigation() {
+    if(!this.options.navigation) return;
+    this.options.navigation.innerHTML = '';
+  }
 };
