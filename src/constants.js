@@ -1,7 +1,9 @@
 export default {
-  IS_ACTIVE: 'is-active',
-  IS_ABSOLUTE: 'is-absolute',
-  IS_DISABLED: 'is-disabled',
+  IS_ACTIVE: 'active',
+  IS_ABSOLUTE: 'absolute',
+  IS_DISABLED: 'disabled',
+  page: 'fullpage',
+  section: 'fullpage__section',
   navList: 'fullpage-nav',
   navItem: 'fullpage-nav__item',
   navButton: 'fullpage-nav__button',

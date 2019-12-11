@@ -26,14 +26,14 @@
     height: 100vh;
     font-size: 45px;
    }
-   .fullpage__section.is-absolute {
+   .fullpage__section--absolute {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     display: none;
    }
-   .fullpage__section.is-absolute.is-active {
+   .fullpage__section--absolute.fullpage__section--active {
     display: flex;
    }
    .fullpage__section:nth-child(odd){
@@ -56,7 +56,7 @@
     bottom: 20px;
     left: 20px;
    }
-   .fullpage__prev.is-disabled, .fullpage__next.is-disabled {
+   .fullpage__prev--disabled, .fullpage__next--disabled {
     opacity: .5;
     pointer-events: none;
    }
@@ -64,7 +64,7 @@
    .fullpage-nav__item {
     margin-bottom: 15px;
    }
-   .fullpage-nav__button.is-active {
+   .fullpage-nav__button--active {
     color: orange;
    }
   </style>

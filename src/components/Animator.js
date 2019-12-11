@@ -1,4 +1,5 @@
-import constants from './components/constants';
+import constants from '../constants';
+import { BEMblock } from '../helpers';
 
 export default class Animator {
   constructor(paginator) {
@@ -36,18 +37,22 @@ export default class Animator {
     this.current.style.transition = `opacity ${this.fadeInDuration}ms`;
     this.current.style.opacity = 0;
 
-    setTimeout(() => {
+    const hideSection = window.setTimeout(() => {
       this.current.style.display = 'none';
       this.current.style.transition = '';
-      this.current.classList.remove(constants.IS_ACTIVE);
+      BEMblock(this.current, constants.section).removeMod(constants.IS_ACTIVE);
+
+      window.clearTimeout(hideSection)
     }, this.fadeInDuration);
 
-    this.next.classList.add(constants.IS_ACTIVE);
+    BEMblock(this.next, constants.section).addMod(constants.IS_ACTIVE);
     this.next.style.display = '';
     this.next.style.transition = `opacity ${this.fadeInDuration}ms`;
-    setTimeout(() => {
+
+    const showSection = window.setTimeout(() => {
       this.next.style.opacity = 1;
-    }, 66);      
+      window.clearTimeout(showSection)
+    });
   };
 
   scrollToSection() {
@@ -59,15 +64,16 @@ export default class Animator {
     this.container.style.transform = `translate(0px, -${this.translate}px)`;
     this.container.style.transition = `transform ${this.transition}ms ${this.easing}`;
 
-    setTimeout(() => {
+    const timeout = window.setTimeout(() => {
       this.container.style.transition = '';
-      this.toggleActiveClasses();
+      this.toggleActiveClasses();      
+      window.clearTimeout(timeout);
     }, this.transition);    
   };
 
   toggleActiveClasses() {
-    this.current.classList.remove(constants.IS_ACTIVE);
-    this.next.classList.add(constants.IS_ACTIVE);
+    BEMblock(this.current, constants.section).removeMod(constants.IS_ACTIVE);
+    BEMblock(this.next, constants.section).addMod(constants.IS_ACTIVE);
   };
 
   _onExit() {

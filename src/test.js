@@ -73,7 +73,7 @@ const options = {
   },
   prevButton: prev,
   nextButton: next,
-  loop: true,
+  loop: false,
   toggleClassesFirst: false
 };
 

@@ -3,10 +3,12 @@ import {
   checkPropertiesSupport,
   createTouchEvents,
   getIdFromUrl,
-  isTouch } from './helpers';
-import Animator from './Animator';
-import constants from './components/constants';
-import defaultParameters from './components/defaultParameters';
+  isTouch,
+  BEMblock
+} from './helpers';
+import Animator from './components/Animator';
+import constants from './constants';
+import defaultParameters from './defaultParameters';
 
 checkPropertiesSupport();
 
@@ -19,7 +21,7 @@ export class Fullpage {
     this.container = container;
     this.sections = [].slice.call(this.container.children);
     this.options = { ...defaultParameters, ...options };
-    this.events = this.options.touchevents && isTouch 
+    this.events = this.options.touchevents && isTouch
       ? ['wheel', 'click', 'swu', 'swd']
       : ['wheel', 'click'];
     this.allowPagination = true;
@@ -48,7 +50,7 @@ export class Fullpage {
     this._removeListeners();
     this._removeElementsAttributes();
     this._removeNavigation();
-    if(this.animator) this.animator.destroy();
+    if (this.animator) this.animator.destroy();
   }
 
   paginateToNext(condition) {
@@ -85,15 +87,17 @@ export class Fullpage {
   };
 
   toggleDisableButtonsClasses() {
+    const BEMnextBtn = BEMblock(this.options.nextButton, constants.next);
+    const BEMprevBtn = BEMblock(this.options.prevButton, constants.prev);
     if (this.next === this.sections.length - 1) {
-      this.options.nextButton.classList.add(constants.IS_DISABLED);
+      BEMnextBtn.addMod(constants.IS_DISABLED);
     } else {
-      this.options.nextButton.classList.remove(constants.IS_DISABLED);
+      BEMnextBtn.removeMod(constants.IS_DISABLED);
     };
     if (this.next === 0) {
-      this.options.prevButton.classList.add(constants.IS_DISABLED);
+      BEMprevBtn.addMod(constants.IS_DISABLED);
     } else {
-      this.options.prevButton.classList.remove(constants.IS_DISABLED);
+      BEMprevBtn.removeMod(constants.IS_DISABLED);
     };
   };
 
@@ -123,7 +127,7 @@ export class Fullpage {
       };
       if (prevBtn || nextBtn) {
         this.paginateOnPrevNextClick(e, prevBtn, nextBtn);
-      };      
+      };
     };
 
     if (this.options.touchevents) {
@@ -167,13 +171,13 @@ export class Fullpage {
     this.allowPagination = false;
 
     this.navigation.forEach(btn => {
-      btn.classList.remove(constants.IS_ACTIVE);
+      BEMblock(btn, constants.navButton).removeMod(constants.IS_ACTIVE)
     });
-    this.navigation[this.next].classList.add(constants.IS_ACTIVE);
+    BEMblock(this.navigation[this.next], constants.navButton).addMod(constants.IS_ACTIVE);
 
     if (this.options.toggleClassesFirst) {
-      this.sections[this.current].classList.remove(constants.IS_ACTIVE);
-      this.sections[this.next].classList.add(constants.IS_ACTIVE);
+      BEMblock(this.sections[this.current], constants.section).removeMod(constants.IS_ACTIVE);
+      BEMblock(this.sections[this.next], constants.section).addMod(constants.IS_ACTIVE);
     };
 
     this.startTime = new Date().getTime();
@@ -185,8 +189,9 @@ export class Fullpage {
 
       const duration = this.finishTime - this.startTime;
       if (duration < this.options.delay) {
-        setTimeout(() => {
+        const timeout = window.setTimeout(() => {
           this.allowPagination = true;
+          window.clearTimeout(timeout);
         }, this.options.delay);
       } else {
         this.allowPagination = true;
@@ -199,14 +204,14 @@ export class Fullpage {
     // add sections fade class
     if (this.options.fadeIn) {
       this.sections.forEach(section => {
-        section.classList.add(constants.IS_ABSOLUTE);
+        BEMblock(section, constants.section).addMod(constants.IS_ABSOLUTE);
         section.style.opacity = 0;
       });
       this.sections[0].style.opacity = 1;
     };
 
     // add first section active class
-    this.sections[0].classList.add(constants.IS_ACTIVE);
+    BEMblock(this.sections[0], constants.section).addMod(constants.IS_ACTIVE)
 
     // add section indexes
     this.sections.forEach((section, i) => {
@@ -224,7 +229,7 @@ export class Fullpage {
     // add prevButton disabled class
     if (!this.options.loop) {
       if (this.current === 0) {
-        this.options.prevButton.classList.add(constants.IS_DISABLED);
+        BEMblock(this.options.prevButton, constants.prev).addMod(constants.IS_DISABLED);
       };
     };
   };
@@ -251,13 +256,13 @@ export class Fullpage {
       item.className = constants.navItem;
       if (this.options.renderNavButton) {
         if (i === 0) {
-          item.innerHTML = `<button class="${constants.navButton} ${constants.IS_ACTIVE}" ${constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
+          item.innerHTML = `<button class="${constants.navButton} ${constants.navButton}--${constants.IS_ACTIVE}" ${constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
         } else {
           item.innerHTML = `<button class="${constants.navButton}" ${constants.index}="${i}">${this.options.renderNavButton(i)}</button>`;
         };
       } else {
         if (i === 0) {
-          item.innerHTML = `<button class="${constants.navButton} ${constants.IS_ACTIVE}" ${constants.index}="${i}">${i + 1}</button>`;
+          item.innerHTML = `<button class="${constants.navButton} ${constants.navButton}--${constants.IS_ACTIVE}" ${constants.index}="${i}">${i + 1}</button>`;
         } else {
           item.innerHTML = `<button class="${constants.navButton}" ${constants.index}="${i}">${i + 1}</button>`;
         };
@@ -276,15 +281,15 @@ export class Fullpage {
 
   _removeElementsAttributes() {
     this.sections.forEach(section => {
-      section.classList.remove(constants.IS_ACTIVE);
-      section.classList.remove(constants.IS_ABSOLUTE);
+      BEMblock(section, constants.section).removeMod(constants.IS_ACTIVE);
+      BEMblock(section, constants.section).removeMod(constants.IS_ABSOLUTE);
       section.style.opacity = '';
       section.removeAttribute(constants.index);
     })
   }
 
   _removeNavigation() {
-    if(!this.options.navigation) return;
+    if (!this.options.navigation) return;
     this.options.navigation.innerHTML = '';
   }
 };

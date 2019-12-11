@@ -229,11 +229,39 @@ function getIdFromUrl() {
     return id.slice(1);
   }
 }
+var BEMblock = function BEMblock(block, name) {
+  var addMod = function addMod(mod) {
+    block.classList.add("".concat(name, "--").concat(mod));
+  };
+
+  var removeMod = function removeMod(mod) {
+    block.classList.remove("".concat(name, "--").concat(mod));
+  };
+
+  var toggleMod = function toggleMod(mod) {
+    block.classList.toggle("".concat(name, "--").concat(mod));
+  };
+
+  var containsMod = function containsMod(mod) {
+    return block.classList.contains("".concat(name, "--").concat(mod));
+  };
+
+  return {
+    name: name,
+    block: block,
+    addMod: addMod,
+    toggleMod: toggleMod,
+    removeMod: removeMod,
+    containsMod: containsMod
+  };
+};
 
 var constants = {
-  IS_ACTIVE: 'is-active',
-  IS_ABSOLUTE: 'is-absolute',
-  IS_DISABLED: 'is-disabled',
+  IS_ACTIVE: 'active',
+  IS_ABSOLUTE: 'absolute',
+  IS_DISABLED: 'disabled',
+  page: 'fullpage',
+  section: 'fullpage__section',
   navList: 'fullpage-nav',
   navItem: 'fullpage-nav__item',
   navButton: 'fullpage-nav__button',
@@ -284,18 +312,19 @@ function () {
 
       this.current.style.transition = "opacity ".concat(this.fadeInDuration, "ms");
       this.current.style.opacity = 0;
-      setTimeout(function () {
+      var hideSection = window.setTimeout(function () {
         _this.current.style.display = 'none';
         _this.current.style.transition = '';
-
-        _this.current.classList.remove(constants.IS_ACTIVE);
+        BEMblock(_this.current, constants.section).removeMod(constants.IS_ACTIVE);
+        window.clearTimeout(hideSection);
       }, this.fadeInDuration);
-      this.next.classList.add(constants.IS_ACTIVE);
+      BEMblock(this.next, constants.section).addMod(constants.IS_ACTIVE);
       this.next.style.display = '';
       this.next.style.transition = "opacity ".concat(this.fadeInDuration, "ms");
-      setTimeout(function () {
+      var showSection = window.setTimeout(function () {
         _this.next.style.opacity = 1;
-      }, 66);
+        window.clearTimeout(showSection);
+      });
     }
   }, {
     key: "scrollToSection",
@@ -307,17 +336,19 @@ function () {
       this.translate = nextTop;
       this.container.style.transform = "translate(0px, -".concat(this.translate, "px)");
       this.container.style.transition = "transform ".concat(this.transition, "ms ").concat(this.easing);
-      setTimeout(function () {
+      var timeout = window.setTimeout(function () {
         _this2.container.style.transition = '';
 
         _this2.toggleActiveClasses();
+
+        window.clearTimeout(timeout);
       }, this.transition);
     }
   }, {
     key: "toggleActiveClasses",
     value: function toggleActiveClasses() {
-      this.current.classList.remove(constants.IS_ACTIVE);
-      this.next.classList.add(constants.IS_ACTIVE);
+      BEMblock(this.current, constants.section).removeMod(constants.IS_ACTIVE);
+      BEMblock(this.next, constants.section).addMod(constants.IS_ACTIVE);
     }
   }, {
     key: "_onExit",
@@ -486,16 +517,19 @@ function () {
   }, {
     key: "toggleDisableButtonsClasses",
     value: function toggleDisableButtonsClasses() {
+      var BEMnextBtn = BEMblock(this.options.nextButton, constants.next);
+      var BEMprevBtn = BEMblock(this.options.prevButton, constants.prev);
+
       if (this.next === this.sections.length - 1) {
-        this.options.nextButton.classList.add(constants.IS_DISABLED);
+        BEMnextBtn.addMod(constants.IS_DISABLED);
       } else {
-        this.options.nextButton.classList.remove(constants.IS_DISABLED);
+        BEMnextBtn.removeMod(constants.IS_DISABLED);
       }
 
       if (this.next === 0) {
-        this.options.prevButton.classList.add(constants.IS_DISABLED);
+        BEMprevBtn.addMod(constants.IS_DISABLED);
       } else {
-        this.options.prevButton.classList.remove(constants.IS_DISABLED);
+        BEMprevBtn.removeMod(constants.IS_DISABLED);
       }
     }
   }, {
@@ -565,13 +599,13 @@ function () {
       if (this.next >= this.sections.length || this.next < 0 || this.next === this.current) return;
       this.allowPagination = false;
       this.navigation.forEach(function (btn) {
-        btn.classList.remove(constants.IS_ACTIVE);
+        BEMblock(btn, constants.navButton).removeMod(constants.IS_ACTIVE);
       });
-      this.navigation[this.next].classList.add(constants.IS_ACTIVE);
+      BEMblock(this.navigation[this.next], constants.navButton).addMod(constants.IS_ACTIVE);
 
       if (this.options.toggleClassesFirst) {
-        this.sections[this.current].classList.remove(constants.IS_ACTIVE);
-        this.sections[this.next].classList.add(constants.IS_ACTIVE);
+        BEMblock(this.sections[this.current], constants.section).removeMod(constants.IS_ACTIVE);
+        BEMblock(this.sections[this.next], constants.section).addMod(constants.IS_ACTIVE);
       }
       this.startTime = new Date().getTime(); // animation goes here
 
@@ -582,8 +616,9 @@ function () {
         var duration = _this.finishTime - _this.startTime;
 
         if (duration < _this.options.delay) {
-          setTimeout(function () {
+          var timeout = window.setTimeout(function () {
             _this.allowPagination = true;
+            window.clearTimeout(timeout);
           }, _this.options.delay);
         } else {
           _this.allowPagination = true;
@@ -598,13 +633,13 @@ function () {
       // add sections fade class
       if (this.options.fadeIn) {
         this.sections.forEach(function (section) {
-          section.classList.add(constants.IS_ABSOLUTE);
+          BEMblock(section, constants.section).addMod(constants.IS_ABSOLUTE);
           section.style.opacity = 0;
         });
         this.sections[0].style.opacity = 1;
       }
 
-      this.sections[0].classList.add(constants.IS_ACTIVE); // add section indexes
+      BEMblock(this.sections[0], constants.section).addMod(constants.IS_ACTIVE); // add section indexes
 
       this.sections.forEach(function (section, i) {
         section.setAttribute(constants.index, i);
@@ -620,7 +655,7 @@ function () {
 
       if (!this.options.loop) {
         if (this.current === 0) {
-          this.options.prevButton.classList.add(constants.IS_DISABLED);
+          BEMblock(this.options.prevButton, constants.prev).addMod(constants.IS_DISABLED);
         }
       }
     }
@@ -652,13 +687,13 @@ function () {
 
         if (this.options.renderNavButton) {
           if (i === 0) {
-            item.innerHTML = "<button class=\"".concat(constants.navButton, " ").concat(constants.IS_ACTIVE, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
+            item.innerHTML = "<button class=\"".concat(constants.navButton, " ").concat(constants.navButton, "--").concat(constants.IS_ACTIVE, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
           } else {
             item.innerHTML = "<button class=\"".concat(constants.navButton, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(this.options.renderNavButton(i), "</button>");
           }
         } else {
           if (i === 0) {
-            item.innerHTML = "<button class=\"".concat(constants.navButton, " ").concat(constants.IS_ACTIVE, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
+            item.innerHTML = "<button class=\"".concat(constants.navButton, " ").concat(constants.navButton, "--").concat(constants.IS_ACTIVE, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
           } else {
             item.innerHTML = "<button class=\"".concat(constants.navButton, "\" ").concat(constants.index, "=\"").concat(i, "\">").concat(i + 1, "</button>");
           }
@@ -680,8 +715,8 @@ function () {
     key: "_removeElementsAttributes",
     value: function _removeElementsAttributes() {
       this.sections.forEach(function (section) {
-        section.classList.remove(constants.IS_ACTIVE);
-        section.classList.remove(constants.IS_ABSOLUTE);
+        BEMblock(section, constants.section).removeMod(constants.IS_ACTIVE);
+        BEMblock(section, constants.section).removeMod(constants.IS_ABSOLUTE);
         section.style.opacity = '';
         section.removeAttribute(constants.index);
       });
@@ -783,7 +818,7 @@ var options = {
   },
   prevButton: prev,
   nextButton: next,
-  loop: true,
+  loop: false,
   toggleClassesFirst: false
 };
 var fullpage = new MyFullpage(page, options);
